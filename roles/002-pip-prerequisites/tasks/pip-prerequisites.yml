@@ -1,0 +1,7 @@
+- name: Ensure pip prerequisites are {{ new_state }}
+  pip:
+    name: "{{ item }}"
+    state: "{{ new_state }}"
+  with_items: "{{ pip_prerequisites }}"
+  become: true
+        

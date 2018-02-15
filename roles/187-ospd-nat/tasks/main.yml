@@ -1,0 +1,3 @@
+---
+# tasks file for 187-ospd-nat
+- include: ospd-nat.yml

@@ -1,0 +1,83 @@
+---
+- name: Fetch UUID of the bastion host
+  shell: "nova list --all-tenants | grep {{ prefix }}-inception | awk '/ACTIVE/ {print $2}'"
+  environment: "{{ openstack_admin_auth_env }}"
+  register: bastion_uuid
+  tags:
+    - bastion-ports
+    - bastion
+
+- name: Gather facts on provisioning network
+  os_networks_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    filters:
+      name: "{{ prefix }}_provisioning"
+  tags:
+    - bastion-ports
+    - bastion
+
+- name: Attach provisioning port to bastion
+  shell: "nova interface-attach --net-id {{ openstack_networks[0].id }}  --fixed-ip {{ networks.provisioning.cidr_prefix }}.{{ bastion_last_octet }} {{ bastion_uuid.stdout }}"
+  environment: "{{ openstack_admin_auth_env }}"
+  when: new_state == "present"
+  tags:
+    - bastion-ports
+    - bastion
+  ignore_errors: true
+
+- name: Gather facts on external network
+  os_networks_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    filters:
+      name: "{{ prefix }}_external"
+  when: use_existing_external_network == "false"
+  tags:
+    - bastion-ports
+    - bastion
+
+- name: Attach external port to bastion
+  shell: "nova interface-attach --net-id {{ openstack_networks[0].id }} --fixed-ip {{ networks.external.cidr_prefix }}.{{ bastion_last_octet }} {{ bastion_uuid.stdout }}"
+  environment: "{{ openstack_admin_auth_env }}"
+  when: new_state == "present" and use_existing_external_network == "false"
+  tags:
+    - bastion-ports
+    - bastion
+  ignore_errors: true
+
+- name: Find the UUID of bastion provisioning port
+  shell: "nova interface-list {{ bastion_uuid.stdout }} | grep {{ networks.provisioning.cidr_prefix }}.{{ bastion_last_octet }} | awk '{print $4}'"
+  environment: "{{ openstack_admin_auth_env }}"
+  when: new_state == "absent"
+  tags:
+    - bastion-ports
+    - bastion
+  register: bastion_provisioning_port_uuid
+
+- name: Detach provisioning port from bastion
+  shell: "nova interface-detach {{ bastion_uuid.stdout }} {{bastion_provisioning_port_uuid.stdout }} "
+  environment: "{{ openstack_admin_auth_env }}"
+  when: new_state == "absent"
+  tags:
+    - bastion-ports
+    - bastion
+  ignore_errors: true
+
+- name: Find the UUID of bastion external port
+  shell: "nova interface-list {{ bastion_uuid.stdout }} | grep {{ networks.external.cidr_prefix }}.{{ bastion_last_octet }} | awk '{print $4}'"
+  environment: "{{ openstack_admin_auth_env }}"
+  when: new_state == "absent" and use_existing_external_network == "false"
+  tags:
+    - bastion-ports
+    - bastion
+  register: bastion_external_port_uuid
+
+- name: Detach external port from bastion
+  shell: "nova interface-detach {{ bastion_uuid.stdout }} {{bastion_external_port_uuid.stdout }} "
+  environment: "{{ openstack_admin_auth_env }}"
+  when: new_state == "absent" and use_existing_external_network == "false"
+  tags:
+    - bastion-ports
+    - bastion
+  ignore_errors: true

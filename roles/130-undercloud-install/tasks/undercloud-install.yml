@@ -1,0 +1,9 @@
+- name: Ensure undercloud is {{ new_state }}
+  shell: "openstack undercloud install"
+  become: yes
+  become_user: stack
+  async: 3600
+  poll: 10
+  tags:
+    - undercloud-install
+    - undercloud

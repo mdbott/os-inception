@@ -1,0 +1,8 @@
+[osds]
+{% for server in openstack_servers %}
+{{ server.addresses.vlan27[0].addr}}
+{% endfor %}
+[mons]
+{% for server in openstack_servers %}
+{{ server.addresses.vlan27[0].addr}}
+{% endfor %}

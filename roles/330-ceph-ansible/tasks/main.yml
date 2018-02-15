@@ -1,0 +1,3 @@
+---
+# tasks file for 330-ceph-ansible
+- include: ceph-ansible.yml

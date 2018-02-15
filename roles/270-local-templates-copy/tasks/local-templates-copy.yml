@@ -1,0 +1,10 @@
+---
+- name: Extract pre-generated templates
+  unarchive:
+    src: files/overcloud.tgz
+    dest: /home/{{ stack_user }}/
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+  tags:
+    - local-templates
+    - templates

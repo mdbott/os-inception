@@ -1,0 +1,55 @@
+- name: Gathering facts on instances
+  os_server_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    server: "{{ prefix }}-{{ node_type }}*"
+    detailed: true
+  tags:
+    - ceph-inventory
+
+- name: Ensure ceph instances for project {{ prefix }} are {{ new_state }} in the inventory
+  add_host:
+    hostname: "{{ item.name }}"
+    ansible_ssh_host: "{{ item.addresses.vlan27[0].addr}}"
+    ansible_ssh_user: cloud-user
+    ansible_become: true
+    become_user: root
+    become_method: sudo
+    groups: 
+      - osds
+      - mons
+      - all
+  with_items: "{{ openstack_servers }}"
+  tags:
+    - ceph-inventory
+
+- name: Add the ceph servers to /etc/ansible/hosts for ceph-ansible run
+  template:
+    src: "hosts.j2"
+    dest: /etc/ansible/hosts
+  become: true
+  tags:
+    - ceph-inventory
+
+- name: Gathering facts on ceph bootstrap instance
+  os_server_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    server: "{{ prefix }}-ceph-1"
+    detailed: true
+  tags:
+    - ceph-inventory
+
+- name: Ensure ceph bootstrap instance for project {{ os_project }} are {{ new_state }} in the inventory
+  add_host:
+    hostname: "{{ prefix }}-ceph-1"
+    ansible_ssh_host: "{{ openstack_servers[0].addresses.vlan27[0].addr }}"
+    ansible_ssh_user: cloud-user
+    ansible_become: true
+    become_user: root
+    groups: 
+      - ceph-bootstrap
+      - all
+  when: not(openstack_servers[0] is undefined)
+  tags:
+    - ceph-inventory

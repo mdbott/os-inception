@@ -1,0 +1,3 @@
+---
+# tasks file for 002-yum-prerequisites
+- include: yum-prerequisites.yml

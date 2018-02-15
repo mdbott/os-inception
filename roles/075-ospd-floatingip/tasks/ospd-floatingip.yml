@@ -1,0 +1,25 @@
+---
+- name: Gathering facts on {{ node_type }} instance
+  os_server_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    server: "{{ prefix }}-{{ node_type }}-1"
+    detailed: true
+  tags:
+    - core
+    - ospd-facts
+
+- name: Ensure that the floatingip assignment for ospd is {{ new_state }}
+  os_floating_ip:
+     cloud: "{{ os_cluster }}"
+     state: "{{ new_state }}"
+     cacert: "{{ cacertfile }}"
+     reuse: yes
+     server: "{{ prefix }}-ospd-1"
+     network: "{{ external_network }}"
+     fixed_address: "{{ openstack_servers[0].addresses.vlan27[0].addr }}"
+     floating_ip_address: "{{ ospd_float }}"
+     wait: true
+     timeout: 180
+  tags:
+    - ospd-float-attach

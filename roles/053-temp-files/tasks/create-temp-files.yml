@@ -1,0 +1,9 @@
+---
+- name: Creating temporary files with glance images
+  copy:
+    src: "files/{{ item.value.filename }}"
+    dest: "/tmp/{{ item.value.filename }}"
+  with_dict: "{{ images }}"
+  tags: 
+    - images
+    - infrastructure

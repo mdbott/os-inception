@@ -1,0 +1,3 @@
+---
+# tasks file for 270-local-templates-copy
+- include: local-templates-copy.yml

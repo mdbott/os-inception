@@ -1,0 +1,26 @@
+- name: Patching ansible
+  patch: 
+    src: files/os_network.py.patch
+    dest: /usr/lib/python2.7/site-packages/ansible/modules/cloud/openstack/os_network.py
+    basedir: /
+  become: true
+  tags:
+    - patches
+
+- name: Patching ansible-openstack-modules
+  patch:
+    src: files/neutron_network.patch
+    dest: /usr/share/ansible/ansible-openstack-modules/neutron_network
+    basedir: /
+  become: true
+  tags:
+    - patches
+
+- name: Patching shade
+  patch:
+    src: files/openstackcloud.py.patch
+    dest: /usr/lib/python2.7/site-packages/shade/openstackcloud.py
+    basedir: /
+  become: true
+  tags:
+    - patches

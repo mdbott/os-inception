@@ -1,0 +1,83 @@
+---
+- name: Create ifcfg- files with DHCP config for the provisioning interface
+  template:
+    src: "ifcfg-eth1.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth1
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  become: true
+  tags:
+    - bastion-ports
+    - bastion
+  when: new_state == "present"
+
+- name: Create ifcfg- files with DHCP config for the external interface
+  template:
+    src: "ifcfg-eth2.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth2
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  become: true
+  tags:
+    - bastion-ports
+    - bastion
+  when: new_state == "present" and use_existing_external_network == "false"
+
+- name: Bring up eth1
+  shell: "ifup eth1"
+  become: true
+  tags:
+    - bastion-ports
+    - bastion
+  when: new_state == "present" 
+
+- name: Bring up eth2
+  shell: "ifup eth2"
+  become: true
+  tags:
+    - bastion-ports
+    - bastion
+  when: new_state == "present" and use_existing_external_network == "false"
+
+- name: Bring down eth1
+  shell: "ifdown eth1"
+  become: true
+  tags:
+    - bastion-ports
+    - bastion
+  when: new_state == "absent" 
+  ignore_errors: true
+
+- name: Bring down eth2
+  shell: "ifdown eth2"
+  become: true
+  with_items:
+    - eth1
+    - eth2
+  tags:
+    - bastion-ports
+    - bastion
+  when: new_state == "absent"  and use_existing_external_network == "false"
+  ignore_errors: true
+
+- name: Delete ifcfg files
+  file: 
+    path: "{{ item }}"
+    state: "{{ new_state }}"
+  become: yes
+  with_items:
+    - /etc/sysconfig/network-scripts/ifcfg-eth1
+    - /etc/sysconfig/network-scripts/ifcfg-eth2
+  tags:
+    - bastion-ports
+    - bastion
+  when: new_state == "absent"
+

@@ -1,0 +1,4 @@
+---
+
+# This is required to use a virtualenv for shade, include in all roles that use os_modules
+#ansible_connection: local

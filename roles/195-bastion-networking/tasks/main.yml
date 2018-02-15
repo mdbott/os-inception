@@ -1,0 +1,3 @@
+---
+# tasks file for 310-ceph-network
+- include: bastion-network.yml

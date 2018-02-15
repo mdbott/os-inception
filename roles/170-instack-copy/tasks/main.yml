@@ -1,0 +1,3 @@
+---
+# tasks file for 170-copy-instack
+- include: instack-copy.yml

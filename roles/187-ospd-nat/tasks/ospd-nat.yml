@@ -1,0 +1,30 @@
+---
+- name: Check if NAT rule for external network is in place
+  shell: "iptables -nvL BOOTSTACK_MASQ -t nat | grep {{ networks.external.cidr }}"
+  become: yes
+  become_user: root
+  register: iptables_check
+  when: use_existing_external_network == "false"
+  ignore_errors: true
+  tags:
+    - ospd-nat
+
+
+- name: Add iptables rule implementing NAT for external network (required for isolated network deployments)
+  shell: "iptables -t nat -A BOOTSTACK_MASQ -s {{ networks.external.cidr }} ! -d {{ networks.external.cidr }} -j MASQUERADE"
+  become: yes
+  become_user: root
+  when: use_existing_external_network == "false" and iptables_check.rc == 1
+  tags:
+    - ospd-nat 
+
+- name: Make iptables rules persistent
+  lineinfile: 
+    path: /etc/sysconfig/iptables
+    line: "-A BOOTSTACK_MASQ -s {{ networks.external.cidr }} ! -d {{ networks.external.cidr }} -j MASQUERADE"
+    insertafter: "-A BOOTSTACK_MASQ -s {{ networks.provisioning.cidr }} ! -d {{ networks.provisioning.cidr }} -j MASQUERADE"
+  become: yes
+  become_user: root
+  when: use_existing_external_network == "false" and iptables_check.rc == 1
+  tags:
+    - ospd-nat

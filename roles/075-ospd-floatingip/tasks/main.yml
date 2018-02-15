@@ -1,0 +1,4 @@
+---
+# tasks file for 065-ospd-floatingip
+- include: ospd-floatingip.yml
+  node_type: ospd

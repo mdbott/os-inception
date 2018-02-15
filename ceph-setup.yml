@@ -1,0 +1,35 @@
+- name: Update ceph inventory
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 305-ceph-inventory
+- name: Ceph setup
+  hosts:
+    - osds
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 310-ceph-networking
+      new_state: "{{ state }}"
+    - role: 320-ceph-repos
+      new_state: "{{ state }}"
+- name: Run ceph-ansible deployment
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 340-ceph-ansible-run
+- name: Ceph key setup
+  hosts:
+    - ceph-bootstrap
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 350-ceph-openstack-key

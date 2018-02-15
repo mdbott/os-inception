@@ -1,0 +1,10 @@
+---
+- name: Deleting temporary files with glance images
+  file:
+    src: "{{ item.value.filename }}"
+    dest: "/tmp/{{ item.value.filename }}"
+    state: absent
+  with_dict: "{{ images }}"
+  tags: 
+    - images
+    - infrastructure

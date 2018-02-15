@@ -1,0 +1,19 @@
+---
+- name: Ensure {{ node_type }} neutron ports for project {{ os_project }} are {{ new_state }}
+  os_port:
+    state: "{{ new_state }}"
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    name: "{{ prefix }}_{{ item.0 }}_{{item.1}}"
+    network: "{{networks[item.0].name}}"
+    no_security_groups:  "{{ networks[item.0].no_security_groups }}"
+    wait: "{{ port_wait }}"
+    fixed_ips:
+      - ip_address: "{{ networks[item.0].cidr_prefix }}.{{ last_octet[node_type][item.1] }}"
+  with_nested:
+    - "{{ nodes[node_type].networks }}"
+    - "{{ last_octet[node_type] }}"
+  tags: 
+    - ports
+    - infrastructure
+  ignore_errors: true

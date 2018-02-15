@@ -1,0 +1,18 @@
+---
+- name: Fetch UUID of the project {{ os_project }}
+  shell: "openstack project show {{ os_project }} | awk '/ id / {print $4}'"
+  environment: "{{ openstack_admin_auth_env }}"
+  register: project_id
+  when: configure_flavors==true
+  tags:
+    - flavor-access
+    - infrastructure
+
+- name: Add access to custom flavors for project {{ os_project }}
+  shell: "( nova flavor-access-list --flavor {{ item.value.name }} | grep -q {{ project_id.stdout }} ) || nova flavor-access-add {{ item.value.name }} {{ project_id.stdout }}"
+  environment: "{{ openstack_admin_auth_env }}"
+  with_dict: "{{ flavors }}"
+  when: configure_flavors==true
+  tags:
+    - flavor-access
+    - infrastructure

@@ -1,0 +1,19 @@
+---
+# tasks file for 350-ceph-openstack-key
+#
+- name: Create OpenStack user definition
+  template:     
+    src: "openstack.client.j2"
+    dest: "/root/openstack.client"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - ceph-openstack-user
+
+- name: Add ceph OpenStack user
+  shell: "ceph auth import --in-file /root/openstack.client"
+  become: yes
+  tags:
+    - ceph-openstack-user
+

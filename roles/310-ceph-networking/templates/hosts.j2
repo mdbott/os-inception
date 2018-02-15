@@ -1,0 +1,6 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+{{ networks.storage.cidr_prefix }}.{{ last_octet.ceph.ceph_1 }} {{ prefix }}-ceph-1
+{{ networks.storage.cidr_prefix }}.{{ last_octet.ceph.ceph_2 }} {{ prefix }}-ceph-2
+{{ networks.storage.cidr_prefix }}.{{ last_octet.ceph.ceph_3 }} {{ prefix }}-ceph-3
+

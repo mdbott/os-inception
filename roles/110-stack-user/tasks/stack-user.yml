@@ -1,0 +1,42 @@
+- name: Ensure the {{ stack_user }} user is {{ new_state }}
+  user:
+    name: "{{ stack_user }}"
+    state: "{{ new_state}}"
+    force: yes
+    groups:
+      - wheel
+  tags:
+    - stack-user
+    - undercloud
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: "{{ new_state }}"
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+  tags:
+    - stack-user
+    - undercloud
+
+- name: Fetch public key
+  shell: "nova keypair-show ansible | awk -F ':' '/Public key:/ {print $NF}'"
+  environment: "{{ openstack_user_auth_env }}"
+  when: new_state=="present"
+  register: public_key
+  delegate_to: localhost
+  tags:
+    - stack-user
+    - stack-user-authorized-keys
+    - undercloud
+
+- name: Add {{ key_name }} public key to authorized_keys for {{ stack_user }}
+  authorized_key:
+    user: "{{ stack_user }}"
+    state: present
+    key: "{{ public_key.stdout }}"
+  when: new_state=="present"
+  tags:
+    - stack-user
+    - stack-user-authorized-keys
+    - undercloud

@@ -1,0 +1,37 @@
+---
+- name: Install ceph-ansible playbook
+  yum:
+    name: ceph-ansible
+    state: "{{ new_state }}"
+  become: true
+  tags: ceph-ansible
+
+- name: Set group_vars for ceph-ansible
+  template: 
+    src: templates/{{item}}.yml.j2
+    dest: /usr/share/ceph-ansible/group_vars/{{item}}.yml
+  with_items:
+    - osds
+    - mons
+    - all
+  become: true
+  tags: ceph-ansible
+
+- name: Create site.yml for ceph-ansible
+  copy:
+    src: /usr/share/ceph-ansible/site.yml.sample
+    dest: /usr/share/ceph-ansible/site.yml
+  become: true
+  tags: ceph-ansible
+
+
+- name: Set permissions on /usr/share/ceph-ansible
+  file:
+    path: /usr/share/ceph-ansible
+    state: directory
+    mode: 0755
+    owner: cloud-user
+    recurse: yes
+  become: true
+  tags: ceph-ansible
+

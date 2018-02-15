@@ -1,0 +1,26 @@
+---
+- name: Create ifcfg- files with DHCP config for additional interfaces
+  template:
+    src: "ifcfg-dhcp.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{item}}
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  with_items:
+    - eth1
+    - eth2
+  tags:
+    - ceph-ifcfg
+  become: true
+  notify: restart_network
+
+- name: Populate /etc/hosts
+  template:
+    src: "hosts.j2"
+    dest: /etc/hosts
+  tags:
+    - ceph-etc-hosts
+  become: true

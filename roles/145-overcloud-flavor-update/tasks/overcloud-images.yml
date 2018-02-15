@@ -1,0 +1,23 @@
+- name: Ensure undercloud baremetal flavor is absent
+  shell: "nova flavor-delete baremetal"
+  become: yes
+  become_user: stack
+  environment: "{{ undercloud_auth_env_v2 }}"
+  tags:
+    - undercloud-flavor
+
+- name: Create undercloud baremetal flavor with 8GB boot drive for os-inception
+  shell: "nova flavor-create baremetal auto 4096 8 1"
+  become: yes
+  become_user: stack
+  environment: "{{ undercloud_auth_env_v2 }}"
+  tags:
+    - undercloud-flavor
+
+- name: Ensure undercloud baremetal flavor has the metadata required by tripleo
+  shell: "nova flavor-key baremetal set capabilities:boot_option=local"
+  become: yes
+  become_user: stack
+  environment: "{{ undercloud_auth_env_v2 }}"
+  tags:
+    - undercloud-flavor

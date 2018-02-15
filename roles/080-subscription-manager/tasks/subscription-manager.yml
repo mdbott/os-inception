@@ -1,0 +1,18 @@
+---
+- name: Ensure {{ satellite_pkg }} is {{ new_state }}
+  yum:
+    name: "{{ satellite_pkg }}"
+    state: "{{ new_state }}"
+  tags:
+    - sub-man
+    - undercloud
+
+- name: Ensure OSPd registration to {{ satellite_url }} with activation key {{ activation_key }} is {{ new_state }}
+  redhat_subscription:
+    state: "{{ new_state }}"
+    activationkey: "{{ activation_key }}"
+    org_id: "{{ satellite_org }}"
+    rhsm_baseurl: "{{ satellite_url }}"
+  tags:
+    - sub-man
+    - undercloud

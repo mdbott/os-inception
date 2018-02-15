@@ -1,0 +1,61 @@
+---
+- name: Import CA cert
+  copy:
+    dest: "{{ osinception_cacertfile }}"
+    content: "{{ osinception_cacert }}"
+    owner: root
+    group: root
+    mode: 644
+  when: new_state == "present"
+  become: true
+  become_user: root
+  tags:
+    - cacert-import
+
+- name: Remove CA cert
+  file:
+    path: "{{ osinception_cacertfile }}"
+    state: absent
+  when: new_state == "absent"
+  become: true
+  become_user: root
+  tags:
+    - cacert-import
+
+- name: Update CA trust
+  shell: "sudo update-ca-trust"
+  become: true
+  become_user: root
+  tags:
+    - cacert-import
+
+- name: create /etc/openstack/ directory
+  file: 
+    dest: /etc/openstack/
+    state: directory
+    owner: cloud-user
+    group: cloud-user
+  become: true
+  become_user: root
+  when: new_state == "present"
+  tags:
+    - cacert-import
+
+- name: Delete /etc/openstack/ directory
+  file: 
+    dest: /etc/openstack/
+    state: absent
+  become: true
+  become_user: root
+  when: new_state == "absent"
+  tags:
+    - cacert-import
+
+- name: create symlink from {{ osinception_cacertfile }} to /etc/openstack/cacert.pem for compatibility with stack-post-deploy
+  file:
+    src: "{{ osinception_cacertfile }}"
+    dest: /etc/openstack/cacert.pem
+    state: link
+  when: new_state == "present"
+  tags:
+    - cacert-import

@@ -1,0 +1,16 @@
+---
+- name: Ensuring custom quota for project {{ os_project }} is {{ new_state }}
+  os_quota:
+    cloud: "{{ os_cluster_admincreds }}"
+    cacert: "{{ cacertfile }}"
+    name: "{{ os_project }}"
+    endpoint_type: admin
+    cores: "{{ quota.vcpus }}"
+    ram: "{{ quota.ram }}"
+    instances: "{{ quota.instances }}"
+    port: "{{ quota.ports }}"
+    state: "{{ new_state }}"
+  when: create_project==true
+  tags: 
+    - quota
+    - infrastructure

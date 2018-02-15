@@ -1,0 +1,12 @@
+{% for repo in yum_repos %}
+[mirror-{{repo}}]
+baseurl = {{reposerver_url}}/{{repo}}
+{% if yum_gpgcheck %}
+gpgcheck = 1
+gpgkey = {{yum_gpgcheck_key}}
+{% else %}
+gpgcheck = 0
+{% endif %}
+name = mirror-{{repo}}
+
+{% endfor %}

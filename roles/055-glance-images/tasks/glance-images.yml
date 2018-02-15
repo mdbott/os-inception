@@ -1,0 +1,17 @@
+---
+- name: Ensure glance images for project {{ os_project }} are {{ new_state }}
+  os_image:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    state: "{{ new_state }}"
+    is_public: False
+    name: "{{ item.value.name }}"
+    filename: "/tmp/{{ item.value.filename }}"
+    container_format: "{{ item.value.container_format }}"
+    disk_format: "{{ item.value.disk_format }}"
+    properties:
+      os_shutdown_timeout: 30
+  with_dict: "{{ images }}"
+  tags:
+    - images
+    - infrastructure

@@ -1,0 +1,4 @@
+---
+# tasks file for 070-update-inventory
+- include: update-inventory.yml
+  node_type: ospd

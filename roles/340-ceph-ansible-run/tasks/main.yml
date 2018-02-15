@@ -1,0 +1,3 @@
+---
+# tasks file for 340-ceph-ansible-run
+- include: ceph-ansible-run.yml

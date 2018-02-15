@@ -1,0 +1,3 @@
+---
+# tasks file for 004-openstack-client
+- include: openstack-client.yml

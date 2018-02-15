@@ -1,0 +1,43 @@
+--- /usr/lib/python2.7/site-packages/ansible/modules/cloud/openstack/os_network.py	2017-06-01 13:00:04.000000000 -0400
++++ os_network.py	2017-08-13 20:09:37.297183873 -0400
+@@ -87,6 +87,9 @@ options:
+      description:
+        - Ignored. Present for backwards compatability
+      required: false
++   port_security_enabled:
++     description:
++       - Indicate whether port security is to be enabled
+ requirements: ["shade"]
+ '''
+ 
+@@ -178,7 +181,8 @@ def main():
+         provider_network_type=dict(required=False),
+         provider_segmentation_id=dict(required=False),
+         state=dict(default='present', choices=['absent', 'present']),
+-        project=dict(default=None)
++        project=dict(default=None),
++	port_security_enabled=dict(default=True, type='bool')
+     )
+ 
+     module_kwargs = openstack_module_kwargs()
+@@ -201,6 +205,7 @@ def main():
+     provider_network_type = module.params['provider_network_type']
+     provider_segmentation_id = module.params['provider_segmentation_id']
+     project = module.params.pop('project')
++    port_security_enabled = module.params['port_security_enabled']
+ 
+     try:
+         cloud = shade.openstack_cloud(**module.params)
+@@ -230,10 +235,10 @@ def main():
+ 
+                 if project_id is not None:
+                     net = cloud.create_network(name, shared, admin_state_up,
+-                                               external, provider, project_id)
++                                               external, port_security_enabled, provider, project_id)
+                 else:
+                     net = cloud.create_network(name, shared, admin_state_up,
+-                                               external, provider)
++                                               external, port_security_enabled, provider)
+                 changed = True
+             else:
+                 changed = False

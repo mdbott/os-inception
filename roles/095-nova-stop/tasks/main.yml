@@ -1,0 +1,3 @@
+---
+# tasks file for 065-nova-stop
+- include: nova-stop.yml

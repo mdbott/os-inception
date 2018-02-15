@@ -1,0 +1,300 @@
+OS-Inception: you have to go deeper!
+=========
+
+OS-Inception is a set of Ansible 2 roles and playbooks that assist in setting up a Red Hat OpenStack Platform Cloud on an existing Overcloud, including a set of 3 Red Hat Ceph Storage clustered servers providing storage in the virtual environment. 
+
+This is ideal for test environments or where developers need to work on the underlying OpenStack infrastructure, but the work in greatly enhanced when the environments are separated so that a broken component in one developer's lab doesn't break everyone else's development environment. It truly implements an OpenStack on OpenStack set of systems. Also, note that these playbooks make full use of Composeable roles to split out Pacemaker and SystemD Controller nodes. This was done to make troubleshooting easier by making the traffic between these services easier to track, however you may choose to recombine these into a single controller node by modifying the playbooks.
+
+Once the run of the playbook is completed, the end-state will be a separate tenant project with its own networks, an inception instance (which holds these playbooks), an OpenStack Director instance with a set of templates ready for modification and to deploy, and a set of blank instances brought into the cluster using a prebuilt pxe_boot image to simulate the deployment of the PXE boot so that the OS-Inception resources can be spread across all compute nodes in your underlying OSP system. The ipmitool binary is replaced with a script taken from hextupleO (https://github.com/OOsemka/hextupleo) which allows IPMI commands to be passed to the underlying base OSP Nova system in order to emulate power-on,d power-off, and power-status commands, meaning pxe_ipmitool driver works - no pxe_ssh required. This also works if your Inception overcloud is spread across multiple Compute nodes for the baremetal OpenStack environment.
+
+In order to run multiple Inception nodes, the inception hosts will live all in a single development project.  Each inception node will create its own project based on the environment variables used in the playbook, and all other hosts will be created in the unique project.
+
+There are some prerequisites in order for this to execute correctly, which are detailed below.
+
+Note: "BASTION" and "Inception" are interchangeable when referring to the inception instance
+
+Requirements
+==========
+In order for OS-Inception to work you will need an existing OpenStack cluster with sufficient resources to run 13 VM's:
++-----------------------+---------------+---------------------------+---------------------------+
+| ID                    | Name          |   Baremetal Project Name  |  Initial Image            |
++-----------------------+---------------+---------------------------+---------------------------+
+| os-inception		| m1.small	|   development-admin       |  rhel7 or fedora27 qcow   |
+| os-compute-2		| os.compute	|   os                      |  pxeboot.img              |
+| os-compute-1		| os.compute	|   os                      |  pxeboot.img              |
+| os-ceph-3		| os.ceph	|   os                      |  rhel7 or fedora27 qcow   |
+| os-ceph-2		| os.ceph	|   os                      |  rhel7 or fedora27 qcow   |
+| os-ceph-1		| os.ceph	|   os                      |  rhel7 or fedora27 qcow   |
+| os-service-3		| os.service	|   os                      |  pxeboot.img              |
+| os-service-2		| os.service	|   os                      |  pxeboot.img              |
+| os-service-1		| os.service	|   os                      |  pxeboot.img              |
+| os-pacemaker-3	| os.pacemaker	|   os                      |  pxeboot.img              |
+| os-pacemaker-2	| os.pacemaker	|   os                      |  pxeboot.img              |
+| os-pacemaker-1	| os.pacemaker	|   os                      |  pxeboot.img              |
+| os-ospd-1		| os.ospd	|   os                      |  pxeboot.img              |
++-----------------------+---------------+---------------------------+---------------------------+
+
+$ openstack flavor list
++--------------+-------+------+-----------+-------+-----------+
+| Name         |   RAM | Disk | Ephemeral | VCPUs | Is Public |
++--------------+-------+------+-----------+-------+-----------+
+| m1.small     |  2048 |   10 |         0 |     1 | True      |
+| os.pacemaker |  8192 |   20 |         0 |     2 | False     |
+| os.ospd      | 16384 |   40 |         0 |     4 | False     |
+| os.compute   |  6144 |   10 |         0 |     4 | False     |
+| os.ceph      |  4096 |   20 |         0 |     2 | False     |
+| os.service   | 16384 |   10 |         0 |     2 | False     |
++--------------+-------+------+-----------+-------+-----------+
+
+As configured in our tests, the total required space is for a single inception overcloud
+Memory:		82  GiB
+Disk:		200 GiB
+Ephemeral: 	0   GiB
+vCPU:		31
+
+The os.* flavors will be created in the os project by the playbook.
+
+License Prerequisites:
+--------------
+If installing Red Hat OpenStack Platform, Red Hat Ceph Storage, and RHEL, please be sure to comply with license requirements.
+
+Inception instance OS and Software
+--------------
+
+OS:
+- RHEL 7 (.3 or .4 tested)
+- Fedora 27
+
+Software:
+- EPEL repository (if using RHEL)
+- pip
+- jq
+- Ansible 2 (tested with 2.3.0-2.3.2)
+
+Setup Instructions
+==============
+_in this example, we call our new OS-Inception openstack "os1"_
+
+
+0. Environment
+
+- switch to v3 by commenting/uncommenting the appropriate section in os-inception/environment/group_vars/all/all
+
+### Keystone V3 only ###
+### End Keystone V3 only ###
+
+### Keystone V2 only ###
+### End Keystone V2 only ###
+
+It is recommended to test on V2 first if possible, as the vast majority of develpoment has been done on V2
+
+- go through os-inception/environment/group_vars/all/all and review everything
+
+AND
+
+- find and replace external_net in code:
+
+[cloud-user@os1-inception roles]$ grep external_net . -R
+./075-ospd-floatingip/tasks/ospd-floatingip.yml:     fixed_address: "{{ openstack_servers[0].addresses.external_net[0].addr }}"
+./305-ceph-inventory/tasks/update-inventory.yml:    ansible_ssh_host: "{{ item.addresses.external_net[0].addr}}"
+./305-ceph-inventory/tasks/update-inventory.yml:    ansible_ssh_host: "{{ openstack_servers[0].addresses.external_net[0].addr }}"
+./305-ceph-inventory/templates/hosts.j2:{{ server.addresses.external_net[0].addr}}
+./305-ceph-inventory/templates/hosts.j2:{{ server.addresses.external_net[0].addr}}
+
+
+1. BAREMETAL CLOUD: create a new VM on external_net, with a floating IP
+
+nova boot --image rhel-server-7.4-x86_64-kvm.qcow2 --flavor m1.small  --key ftkey --nic net-name=external_net os-inception
+
+nova floating-ip-associate os-inception 10.0.0.101
+
+
+2. BASTION: clone inception repo
+
+git clone https://github.com/snowjet/os-inception.git
+
+
+3. BAREMETAL CLOUD: make sure that the OSPd IP and the bastion host IP matches the floats configured in clouddata. Make sure the project (osN) matches clouddata.
+
+4. BASTION: sudo curl http://yum.example.com/localmirror.repo -o /etc/yum.repos.d/localmirror.repo
+
+5. BASTION: sudo yum -y install git ansible
+
+6. BASTION: verify that:
+
+- the project_name 
+- OSPd float 
+
+are correct and match clouddata. The float must not yet exist in another project!
+
+
+7. BASTION: cd os-inception; ansible-playbook env-setup.yml
+
+IF REDEPLOYING THE LAB: make sure the nodes you want to avoid have compute serivce switched off temporarily 
+IF REDEPLOYING THE LAB: rebuild the overcloud systems with the pxeboot.img ( a nova rebuild command should suffice against each host )
+
+8. BASTION: ansible-playbook create-openstack-on-openstack.yml
+
+9. OSPD:
+- IF USING EXTERNAL CEPH:  because we use external ceph, we will skip the ceph playbook. Just verify if the ceph user and key on iron-ceph match [~]$ cat overcloud/puppet-ceph-external.yaml
+
+This can be done using:
+
+[root ~(OpenStack: baremetal-user@baremetal-inception-project)]# ceph auth list
+
+…
+
+client.openstack
+
+       key: abcdefghijl,mnopqrstuvwxYz==
+
+       caps: [mon] allow r
+
+       caps: [osd] allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images, allow rwx pool=backups, allow rwx pool=metrics
+
+- IF USING BUILTIN CEPH: BASTION: ansible-playbook setup-ceph.yml
+
+10. OSPd: run deploy:
+
+* Source creds
+
+. stackrc
+
+* Import instack.json
+
+openstack baremetal import --json instack.json
+
+* Configure boot
+
+Openstack baremetal configure boot
+
+* Run deploy
+
+./deploy.sh
+
+* OSPD_OTHER_SHELL: monitor when nodes transition to wait_callback
+
+watch “nova list; ironic node-list”
+
+* BASTION Power on all VMs
+
+nova start $(nova list | grep -v ospd | awk '/os3/ {printf $4 " "}')
+
+* OTHER_SHELL: monitor when nodes transition to active
+
+* BASTION: Power on all VMs again
+
+* Deploy should complete in ~45mins
+
+
+11. BASTION/ospd“steal” stack user’s private key from ospd. Save it to ~/.ssh/heat-admin.key on the bastion
+
+12. BASTION configure ssh client accordingly
+
+[cloud-user@os-inception ~(OpenStack: ansible@inception-project1)]$ cat .ssh/config 
+<<<
+Host pacemaker*
+
+       User heat-admin
+
+       StrictHostKeyChecking no
+
+       UserKnownHostsFile=/dev/null
+
+       IdentityFile ~/.ssh/heat-admin.priv
+
+Host service*
+
+       User heat-admin
+
+       StrictHostKeyChecking no
+
+       UserKnownHostsFile=/dev/null
+
+       IdentityFile ~/.ssh/heat-admin.priv
+
+Host compute*
+
+       User heat-admin
+
+       StrictHostKeyChecking no
+
+       UserKnownHostsFile=/dev/null
+
+       IdentityFile ~/.ssh/heat-admin.priv
+
+Host *
+
+       User cloud-user
+
+       StrictHostKeyChecking no
+
+       UserKnownHostsFile=/dev/null
+
+       IdentityFile ~/.ssh/id_rsa
+>>>
+
+[cloud-user@os-inception ~(OpenStack: ansible@ios-inception-project)]$ 
+
+
+
+13. BASTION make sure that all the overcloud nodes (IPs visible from undercloud) nodes are defined in /etc/hosts
+
+14. validate - manual VM boot or tempest
+
+
+TROUBLESHOOTING
+
+The playbook uses a rich collection of tags which allow limiting the tasks that are run. For example:
+
+To regenerated service instances only:
+
+ansible-playbook delete-openstack-on-openstack.yml --tags service-instances
+ansible-playbook create-openstack-on-openstack.yml --tags service-instances
+
+To regenerate templates (eg after clouddata/icloud-puppet run)
+
+ansible-playbook create-openstack-on-openstack.yml --tags core,templates
+
+To recreate virtual ceph:
+
+ansible-playbook delete-openstack-on-openstack.yml --tags ceph-instances
+ansible-playbook create-openstack-on-openstack.yml --tags ceph-instances
+ansible-playbook ceph-setup.yml
+
+"core" needs to be included for anything that uses dynamic inventory (anything that runs in OSPd for example)
+
+"infrastructure" is limited to IaaS bits - creates projects/networks/instances etc - basically no software or templating
+
+Possibilities are endless. The user is encouraged to look through tags defined in the roles.
+
+
+License
+-------
+    
+    OS-Inception - automation for building openstack on openstack
+    Copyright (C) 2017 Rarm Nagalingam at Red Hat, Inc
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+Author Information
+------------------
+
+GitHub IDs and e-mails
+- Rarm Nagalingam: snowjet
+- Jacob Anders:  jacobanders
+- Max D Bott:    mdbott
+- John Apple II: 9strands ( jappleii -{at}- redhat -{dot}- com or john -{at}- theapplefamily -{dot}- info )
+

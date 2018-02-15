@@ -1,0 +1,29 @@
+---
+- name: Create ifcfg- files with DHCP config for the external interface
+  template:
+    src: "ifcfg-dhcp.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{item}}
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  when: use_existing_external_network == "false"
+  become: true
+  with_items:
+    - eth2
+  tags:
+    - ospd-ifcfg
+    - undercloud
+
+- name: Bring up the interface
+  shell: "ifup {{ item }}"
+  become: true
+  with_items:
+    - eth2
+  when: use_existing_external_network == "false"
+  tags:
+    - ospd-ifcfg
+    - undercloud
+

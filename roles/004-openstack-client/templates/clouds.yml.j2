@@ -1,0 +1,30 @@
+clouds:
+  {{ os_cluster }}:
+    auth:
+      auth_url: {{ os_cluster_keystone_adminurl }}
+      username: {{ ansible_user }}
+      password: {{ ansible_user_password }}
+      project_name: {{ os_project }}
+{% if identity_api_version == 3 %}
+      user_domain_name: {{ user_domain_name }}
+      project_domain_name: {{ project_domain_name }}
+    identity_api_version: {{ identity_api_version }}
+{% endif %}
+  {{ os_cluster_admincreds }}:
+    auth:
+      auth_url: {{ os_cluster_keystone_adminurl }}
+      username: {{ admin_user }}
+      password: {{ admin_user_password }}
+      project_name: {{ admin_project }}
+{% if identity_api_version == 3 %}
+      user_domain_name: {{ user_domain_name }}
+      project_domain_name: {{ project_domain_name }}
+    identity_api_version: {{ identity_api_version }}
+{% endif %}
+  undercloud:
+    auth:
+      auth_url: http://{{ undercloud.undercloud_public_vip }}:5000/v2.0
+      username: {{ admin_user }}
+      password: {{ undercloud.undercloud_admin_password }}
+      project_name: {{ admin_project }}
+
