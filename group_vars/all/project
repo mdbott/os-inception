@@ -1,0 +1,23 @@
+# ansible user & password are set for funkytown deployment
+# Comment out and use -k for individual developer cloud setup
+use_running_user: false
+ansible_user: ansible
+ansible_ssh_pass: passw0rd
+
+undercloud_admin_password: passw0rd
+
+# OpenStack domain name
+project_domain_name: IPA
+
+# admin user name, password and role
+admin_user: admin
+admin_user_password: passw0rd
+admin_project: admin
+admin_domain_name: default
+
+bastion_user: cloud-user
+bastion_user_group: "{{ bastion_user }}"
+ospd_user: cloud-user
+ospd_user_group: cloud-user
+
+icloud_puppet_branch: "unclass_{{ os_project }}"

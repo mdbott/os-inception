@@ -1,0 +1,27 @@
+---
+
+
+# - name: Check Services are running
+#   command: "/usr/bin/systemctl show openstack-nova-compute --property ActiveState"
+#   become: true
+#   register: nova_status_result
+#   changed_when: False
+#   ignore_errors: true
+#   tags:
+#     - undercloud-install
+#     - undercloud
+#     - rebuild
+
+
+- name: Ensure overcloud is deployed
+  shell: >
+    set -o pipefail &&
+    /home/stack/deploy.sh  > /home/stack/overcloud_deploy.log 2>&1
+  become: yes
+  become_user: stack
+  #when: "'{{nova_status_result.stdout_lines | last}}' == 'ActiveState=inactive'"
+  async: 3600
+  poll: 20
+  when: osp_version==10
+  tags:
+    - overcloud-deploy

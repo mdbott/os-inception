@@ -1,0 +1,9 @@
+# created by ansible
+BOOTPROTO=static
+DEVICE=eth1
+ONBOOT=yes
+IPADDR={{ networks.provisioning.cidr[:-4] }}{{ ansible_eth0.ipv4.address.split('.')[3] }}
+NETMASK=255.255.255.0
+PEERDNS=no
+TYPE=Ethernet
+USERCTL=no

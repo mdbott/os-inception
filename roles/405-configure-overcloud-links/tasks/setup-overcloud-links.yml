@@ -1,0 +1,25 @@
+---
+
+- name: Gathering facts on instances
+  os_server_facts:
+    cloud: "undercloud"
+    server: "*"
+    detailed: true
+
+- name: Get a json object containing instance networks
+  shell: "openstack --os-cloud undercloud server list -c Name -c Networks -f json | jq -r 'def stripchars(banish): explode - (banish | explode) | implode;map( . as $o | {($o.Name):($o.Networks)}) | .[] | to_entries | .[]| .value |= (split(\" \")|map(split(\"=\")|  if (.[1]) == null then {\"floating\": (.[0]| stripchars(\";,\"))} else {(.[0]| stripchars(\";,\")): (.[1]| stripchars(\";,\"))} end ) |add )| [.] | from_entries'| jq -s '.|add'"
+  #environment: "{{ undercloud_auth_env_v2 }}"
+  register: result
+
+- name: set the instance_network fact
+  set_fact:
+    instance_networks: "{{ result.stdout | from_json }}"
+
+- name: Update /etc/hosts with overcloud nodes
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '{{ instance_networks[item.name]["ctlplane"] }}.*'
+    line: '{{ instance_networks[item.name]["ctlplane"] }} {{ item.name }}.{{ domain_name }} {{ item.name }}'
+    state: present
+  with_items: "{{ openstack_servers | sort(attribute='name') }}"
+  become: true

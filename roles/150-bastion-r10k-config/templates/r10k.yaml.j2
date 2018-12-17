@@ -1,0 +1,7 @@
+:cachedir: /var/cache/r10k
+:sources:
+  icloud:
+    basedir: /etc/puppet/cloud_environments
+    prefix: true
+    remote: {{ git_repos.icloud }}
+

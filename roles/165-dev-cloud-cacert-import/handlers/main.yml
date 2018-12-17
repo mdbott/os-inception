@@ -1,0 +1,8 @@
+---
+# handlers file for 185-cacert-import
+- name: update-ca-trust
+  shell: "sudo update-ca-trust"
+  become: true
+  become_user: root
+  tags:
+    - cacert-import 

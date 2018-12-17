@@ -1,0 +1,7 @@
+- name: Run ceph-ansible
+  shell: "ansible-playbook -i hosts/inventory site.yml"
+  args:
+    chdir: ~/ceph-ansible
+  tags:
+    - ceph-ansible-run
+

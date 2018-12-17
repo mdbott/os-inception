@@ -1,0 +1,94 @@
+- name: Ensure the directory for overcloud images is {{ new_state }}
+  file:
+    path: /home/{{ stack_user }}/images
+    state: directory
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - overcloud-images
+    - undercloud
+    - rebuild
+
+- name: Gather overcloud images
+  unarchive:
+    src: "{{item}}"
+    dest: /home/stack/images/
+    remote_src: yes
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0644
+  become: true
+  with_items:
+    "{{ overcloud_image_files }}"
+#  when: new_state=="present"
+  tags:
+    - overcloud-images
+    - undercloud
+    - rebuild
+
+- name: Generate local mirror repo definition file
+  template:
+    src: "templates/localmirror.repo.j2"
+    dest: "/home/{{ stack_user }}/images/localmirror.repo"
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0644
+  become: true
+  tags:
+    - customise-overcloud-image
+    - undercloud
+    - rebuild
+
+- name: Install libguestfs-tools-c to manipulate overcloud images
+  yum:
+    name: libguestfs-tools-c
+    state: present
+  become: true
+  tags:
+    - customise-overcloud-image
+    - undercloud
+    - rebuild
+
+- name: Inject local mirror repo definition file
+  shell: "virt-customize -a /home/stack/images/overcloud-full.qcow2 --copy-in /home/{{ stack_user }}/images/localmirror.repo:/etc/yum.repos.d --root-password password:{{ overcloud_rootpw }}"
+  environment:
+    LIBGUESTFS_BACKEND: direct
+  become: true
+  tags:
+    - customise-overcloud-image
+    - undercloud
+    - rebuild
+
+- name: Ensure undercloud glance images are {{ new_state }}
+  shell: "openstack overcloud image upload --image-path /home/stack/images/ --update-existing"
+  environment: "{{ undercloud_auth_env_v2 }}"
+  args:
+    chdir: /home/stack/images/
+  become: yes
+  become_user: stack
+  ignore_errors: true
+  async: 120
+  poll: 10
+  when: osp_version==10
+  tags:
+    - overcloud-images
+    - undercloud
+    - rebuild
+
+- name: Ensure undercloud glance images are {{ new_state }}
+  shell: "openstack overcloud image upload --image-path /home/stack/images/ --update-existing"
+  environment: "{{ undercloud_auth_env_v3 }}"
+  args:
+    chdir: /home/stack/images/
+  become: yes
+  become_user: stack
+  ignore_errors: true
+  async: 120
+  poll: 10
+  when: osp_version==13
+  tags:
+    - overcloud-images
+    - undercloud
+    - rebuild

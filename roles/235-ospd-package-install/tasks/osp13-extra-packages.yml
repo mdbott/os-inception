@@ -1,0 +1,12 @@
+---
+- name: Ensure osp13 undercloud packages and dependencies are present
+  yum:
+    name: ceph-ansible
+    state: present
+  async: "{{ yum_timeout }}"
+  poll: "{{ yum_poll }}"
+  become: true
+  tags:
+    - tripleo-packages
+    - undercloud
+    - rebuild

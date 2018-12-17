@@ -1,0 +1,67 @@
+---
+
+- name: Get the current list of projects that can access nest virt resources.
+  shell:  "openstack --os-cloud {{ os_cluster_admincreds }} aggregate show {{ inception_host_aggregate }} -c properties -f json| jq -r 'def stripquotes: explode | map(select(39!=.)) | implode; .properties| split(\"=\")[1]|stripquotes |split(\",\") '"
+  register: aggregate_projects
+  when: create_project==true 
+  tags:
+    - nested
+    - infrastructure
+
+- name: set the authorised_projects fact
+  set_fact:
+    authorised_projects: "{{ aggregate_projects.stdout | from_json }}"
+  tags:
+    - nested
+    - infrastructure
+
+- debug:
+    msg: 'Aggregate Projects: {{ aggregate_projects.stdout }}'
+  tags:
+    - nested
+    - infrastructure
+
+- debug:
+    msg: 'Authorised Projects: {{ authorised_projects }}'
+  tags:
+    - nested
+    - infrastructure
+
+- debug:
+    msg: 'filter_tenant_id: {{ authorised_projects|join(",")+","+os_project_id.stdout }}'
+  when: new_state=='present'
+  tags:
+    - nested
+    - infrastructure
+
+- debug:
+    msg: 'filter_tenant_id: {{ authorised_projects|difference([os_project_id.stdout])|join(",") }}'
+  when: new_state=='absent'
+  tags:
+    - nested
+    - infrastructure
+
+- name: Add the inception tenant to the list of projects that can access nest virt resources.
+  os_nova_host_aggregate:
+    cloud: "{{ os_cluster_admincreds }}"
+    cacert: "{{ cacertfile }}"
+    name: "{{ inception_host_aggregate }}"
+    metadata:
+      filter_tenant_id: '{{ authorised_projects|join(",")+","+os_project_id.stdout }}'
+    state: "{{ new_state }}"
+  when: "new_state=='present' and create_project==true and {{ os_project_id.stdout not in authorised_projects }}"
+  tags:
+    - nested
+    - infrastructure
+
+- name: Remove the inception tenant to the list of projects that can access nest virt resources.
+  os_nova_host_aggregate:
+    cloud: "{{ os_cluster_admincreds }}"
+    cacert: "{{ cacertfile }}"
+    name: "{{ inception_host_aggregate }}"
+    metadata:
+      filter_tenant_id: '{{ authorised_projects|difference([os_project_id.stdout])|join(",") }}'
+  when: "new_state=='absent' and create_project==true and {{ os_project_id.stdout in authorised_projects }}"
+  tags:
+    - nested
+    - infrastructure

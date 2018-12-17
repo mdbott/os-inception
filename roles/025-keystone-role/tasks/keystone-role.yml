@@ -1,0 +1,46 @@
+---
+- name: Ensuring {{ ansible_role }} role for user {{ ansible_user }} in {{ os_project }}  keystone project is {{ new_state }}
+  os_user_role:
+    cloud: "{{ os_cluster_admincreds }}"
+    cacert: "{{ cacertfile }}"
+    endpoint_type: admin
+    user: "{{ ansible_user }}"
+    role: "{{ ansible_role }}"
+    project: "{{ os_project }}"
+    state: "{{ new_state }}"
+  when: create_project==true and identity_api_version==2
+  tags:
+    - role
+    - infrastructure
+
+- name: Ensuring admin role for user {{ admin_user }} in {{ os_project }}  keystone project is {{ new_state }}
+  os_user_role:
+    cloud: "{{ os_cluster_admincreds }}"
+    cacert: "{{ cacertfile }}"
+    endpoint_type: admin
+    user: "{{ admin_user }}"
+    role: "admin"
+    project: "{{ os_project }}"
+    state: "{{ new_state }}"
+  when: create_project==true and identity_api_version==2
+  tags:
+    - role
+    - infrastructure
+
+# os_user_role module doesn't handle domains in the way that we need. It puts the role information in a domain, as opposed to
+# granting a role in a project in a domain. Hence we do it in shell, using the command from stack-post-deploy
+- name: Ensuring {{ ansible_role }} role for user {{ ansible_user }} in {{ os_project }}  keystone project is {{ new_state }}
+  shell: "(openstack --os-cloud {{ os_cluster_admincreds }} role assignment list --user {{ ansible_user }} --project {{ os_project }} --names | grep {{ ansible_role  }} ) || (openstack --os-cloud {{ os_cluster_admincreds }} role add --user {{ ansible_user }} --project {{ os_project }} _member_)"
+  # environment: "{{ openstack_admin_auth_env }}"
+  when: create_project==true and identity_api_version==3
+  tags:
+    - role
+    - infrastructure
+
+- name: Ensuring {{ ansible_role }} role for user {{ ansible_user }} in {{ os_project }}  keystone project is {{ new_state }}
+  shell: "(openstack --os-cloud {{ os_cluster_admincreds }} role assignment list --user {{ ansible_user }} --user-domain {{ user_domain_name }} --project {{ os_project }} --names | grep {{ ansible_role  }} ) || (openstack --os-cloud {{ os_cluster_admincreds }} role add --project-domain {{ project_domain_name }} --user-domain {{ user_domain_name }} --user {{ ansible_user }} --project {{ os_project }} _member_)"
+  # environment: "{{ openstack_admin_auth_env }}"
+  when: create_project==true and identity_api_version==3
+  tags:
+    - role
+    - infrastructure

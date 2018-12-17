@@ -1,0 +1,59 @@
+---
+
+- name: create /home/{{ bastion_user }}/.ssh directory
+  file:
+    dest: "/home/{{ bastion_user }}/.ssh"
+    state: directory
+    owner: "{{ bastion_user }}"
+    group: "{{ bastion_user_group }}"
+  tags:
+    - cloud-user-keys
+
+
+- name: Install private key
+  copy:
+    content: "{{ key_content }}"
+    dest: "~/.ssh/id_rsa.osdev{{ os_project }}"
+    mode: 0600
+    owner: "{{ bastion_user }}"
+    group: "{{ bastion_user_group }}"
+  tags:
+    - cloud-user-keys
+
+
+- name: Generate public key from private key
+  shell: "/usr/bin/ssh-keygen -y -f ~/.ssh/id_rsa.osdev{{ os_project }} > ~/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  args:
+    creates: "~/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  tags:
+    - cloud-user-keys
+
+- name: fix permissions on ssh public key file
+  file:
+    path: "/home/{{ bastion_user }}/.ssh/id_rsa.osdev{{ os_project }}.pub"
+    owner: "{{ bastion_user }}"
+    group: "{{ bastion_user_group }}"
+  tags:
+    - cloud-user-keys
+
+
+- name: Fetch public key
+  shell: "cat ~/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  register: public_key
+  tags:
+    - cloud-user-keys
+
+
+- name: Add {{ key_name }} public key to authorized_keys for {{ bastion_user }}
+  authorized_key:
+    user: "{{ bastion_user }}"
+    state: present
+    key: "{{ public_key.stdout }}"
+  tags:
+    - cloud-user-keys
+
+
+# - name: fix permissions on ssh config file
+#   file:
+#     path: "/home/{{ bastion_user }}/.ssh/config"
+#     mode: 0600

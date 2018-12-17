@@ -1,0 +1,15 @@
+---
+- name: Copy instack.json to /home/stack on the undercloud
+  copy:
+    src: /tmp/nodes.json
+    remote_src: True
+    dest: /home/stack/instack.json
+    owner: stack
+    group: stack
+    mode: 0644
+  become: True
+#  when: new_state=="present"
+  tags:
+    - instack-copy
+    - templates
+    - rebuild

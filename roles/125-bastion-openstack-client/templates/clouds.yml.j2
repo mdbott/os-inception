@@ -1,0 +1,46 @@
+clouds:
+  {{ os_cluster }}:
+    auth:
+      auth_url: {{ os_cluster_keystone_adminurl }}
+      username: {{ hostvars['localhost']['ansible_user'] }}
+      password: "{{ ansible_ssh_pass }}"
+      project_name: {{ os_project }}
+{% if identity_api_version == 3 %}
+      project_id: {{ os_project_id }}
+      user_domain_name: {{ user_domain_name }}
+      project_domain_name: {{ project_domain_name }}
+    identity_api_version: {{ identity_api_version }}
+    compute_api_version: {{ compute_api_version }}
+{% endif %}
+    cacert: {{ cacertfile }}
+  {{ os_cluster_admincreds }}:
+    auth:
+      auth_url: {{ os_cluster_keystone_adminurl }}
+      username: {{ admin_user }}
+      password: {{ admin_user_password }}
+      project_name: {{ admin_project }}
+{% if identity_api_version == 3 %}
+      user_domain_name: {{ admin_domain_name }}
+      project_domain_name: {{ admin_domain_name }}
+    identity_api_version: {{ identity_api_version }}
+    compute_api_version: {{ compute_api_version }}
+{% endif %}
+    cacert: {{ cacertfile }}
+  undercloud:
+    auth:
+      auth_url: https://{{ undercloud.undercloud_public_vip }}:13000/v2.0
+      username: {{ admin_user }}
+      password: {{ undercloud_admin_password }}
+      project_name: {{ admin_project }}
+    cacert: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+  undercloud_v3:
+    auth:
+      auth_url: https://{{ undercloud.undercloud_public_vip }}:13000/
+      username: {{ admin_user }}
+      password: {{ undercloud_admin_password }}
+      project_name: admin
+      user_domain_name: Default
+      project_domain_name: Default
+    identity_api_version: 3
+    compute_api_version: 2.1
+    cacert: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem

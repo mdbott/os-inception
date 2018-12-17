@@ -1,0 +1,6 @@
+---
+# tasks file for 270-local-templates-copy
+- include: deployment-scripts-10.yml
+  when: osp_version==10
+- include: deployment-scripts-13.yml
+  when: osp_version==13

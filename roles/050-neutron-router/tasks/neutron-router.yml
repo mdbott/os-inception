@@ -1,0 +1,18 @@
+---
+- name: Ensure the external neutron router for project {{ os_project }} are {{ new_state }}
+  os_router:
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_ssh_pass }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    state: "{{ new_state }}"
+    name: "{{ prefix }}_external_router"
+    network: "{{ external_network }}"
+    interfaces:
+      - "{{ prefix }}_external"
+  tags:
+    - router
+    - infrastructure
+  ignore_errors: true

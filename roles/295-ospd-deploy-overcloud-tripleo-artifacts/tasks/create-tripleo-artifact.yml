@@ -1,0 +1,69 @@
+---
+
+- name: Setup the puppet modules path
+  command: mkdir -p modules-deploy/etc/puppet/modules/
+  args:
+    chdir: /home/stack
+  become: true
+  tags:
+    - deploy-modules
+    - templates
+    - rebuild
+
+- name: Setup the puppet modules  in the correct path
+  command: cp -rp modules modules-deploy/etc/puppet/
+  args:
+    chdir: /home/stack
+  become: true
+  tags:
+    - deploy-modules
+    - templates
+    - rebuild
+
+- name: Change the module permissions to root
+  command: chown -R root:root modules-deploy
+  args:
+    chdir: /home/stack
+  become: true
+  tags:
+    - deploy-modules
+    - templates
+    - rebuild
+
+- name: Archive the puppet modules
+  archive:
+    path: /home/stack/modules-deploy/etc
+    dest: /home/stack/modules.tgz
+  become: true
+  tags:
+    - deploy-modules
+    - templates
+    - rebuild
+
+- name: Deploy the modules artifact into the undercloud
+  shell: "upload-swift-artifacts -f modules.tgz"
+  become: yes
+  become_user: stack
+  args:
+    chdir: /home/stack
+    creates: /home/stack/.tripleo/environments/deployment-artifacts.yaml
+  environment: "{{ undercloud_auth_env_v2 }}"
+  when: osp_version==10
+  tags:
+    - deploy-modules
+    - templates
+    - rebuild
+
+- name: Deploy the modules artifact into the undercloud
+  shell: "upload-swift-artifacts -f modules.tgz"
+  become: yes
+  become_user: stack
+  args:
+    chdir: /home/stack
+    creates: /home/stack/.tripleo/environments/deployment-artifacts.yaml
+  environment: "{{ undercloud_auth_env_v3 }}"
+  when: osp_version==13
+  tags:
+    - deploy-modules
+    - templates
+    - rebuild

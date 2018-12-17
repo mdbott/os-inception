@@ -1,0 +1,35 @@
+{
+  "nodes": [
+{% for source in default_log_path|list + application_log_path|list %}
+{
+  "capabilities": "node:$IRONIC_TAG",
+  "cpu": "2",
+  "memory": "32768",
+  "disk": "40",
+  "pm_user": "{{ ironic_virtual_ipmi.user }}",
+  "pm_password": "{{ ironic_virtual_ipmi.password }}",
+  "pm_addr": "{{ os_cluster_keystone_publicurl }}/$NODE_NAME",
+  "arch": "x86_64",
+  "name": "$NODE_SHORT",
+  "pm_type": "pxe_ipmitool",
+  "mac": [
+    "$MAC"
+  ]}{% if not loop.last %},{% endif %}
+    {
+      "capabilities": "node:service-2",
+      "cpu": "2",
+      "memory": "32768",
+      "disk": "40",
+      "pm_user": "{{ ironic_virtual_ipmi.user }}",
+      "pm_password": "{{ ironic_virtual_ipmi.password }}",
+      "pm_addr": "{{ os_cluster_keystone_publicurl }}/os1-service-3",
+      "arch": "x86_64",
+      "name": "service-3",
+      "pm_type": "pxe_ipmitool",
+      "mac": [
+        "fa:16:3e:1b:e0:d0"
+      ]
+    }
+  ]{% if not loop.last %},{% endif %}
+{% endfor %}
+}

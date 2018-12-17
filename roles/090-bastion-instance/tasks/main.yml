@@ -1,0 +1,3 @@
+---
+- include: bastion-instance.yml
+  node_type: bastion

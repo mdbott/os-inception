@@ -1,0 +1,5 @@
+---
+
+#- include: setup-undercloud-creds.yml
+#- include: setup-overcloud-facts.yml
+- include: setup-overcloud-links.yml

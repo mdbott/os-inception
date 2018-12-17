@@ -1,0 +1,23 @@
+---
+
+- name: Ensure ssh configuration is present
+  blockinfile:
+    dest: ~/.ssh/config
+    create: yes
+    marker: "# {mark} overcloud network access "
+    content: |
+      Host "{{ networks.provisioning.cidr[:-4]+'*' }}"
+      	User cloud-user
+      	StrictHostKeyChecking no
+      	UserKnownHostsFile=/dev/null
+      	IdentityFile {{ key_file }}
+      Host "{{ networks.external.cidr[:-4]+'*' }}"
+      	User cloud-user
+      	StrictHostKeyChecking no
+      	UserKnownHostsFile=/dev/null
+      	IdentityFile {{ key_file }}
+  become: yes
+  become_user: stack
+  tags:
+    - overcloud-heat-configuration
+    - preprovisioned-nodes

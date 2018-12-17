@@ -1,7 +1,0 @@
----
-- name: Stop nova instances
-  shell: "nova stop $(nova list | grep -v {{ os_project }}-ospd-1 | grep {{ os_project }} | awk '{printf $4 \" \"}')"
-  environment: "{{ openstack_user_auth_env }}"
-  ignore_errors: true
-  tags:
-    - nova-stop

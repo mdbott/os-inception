@@ -1,0 +1,5 @@
+---
+# handlers file for 310-ceph-network
+- name: restart_network
+  service: name=network state=restarted
+  become: true

@@ -1,0 +1,4 @@
+---
+# tasks file for 065-ospd-floatingip
+- include: bastion-floatingip.yml
+  node_type: bastion

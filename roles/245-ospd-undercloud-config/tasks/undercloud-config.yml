@@ -1,0 +1,12 @@
+- name: Ensure undercloud config is {{ new_state }}
+  template:
+    src: undercloud.conf.{{ osp_version }}.j2
+    dest: /home/{{ stack_user }}/undercloud.conf
+    owner: stack
+    group: stack
+    mode: 0644
+  become: true
+  tags:
+    - undercloud-config
+    - undercloud
+    - rebuild

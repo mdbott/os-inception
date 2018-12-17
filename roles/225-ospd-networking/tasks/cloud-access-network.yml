@@ -1,0 +1,45 @@
+---
+
+
+- name: Create ifcfg- files with DHCP config for the cloud access interface
+  template:
+    src: "ifcfg-eth2.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth2
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  become: true
+  tags:
+    - ospd-ports
+  when: new_state == "present" and use_existing_external_network == "false"
+
+
+- name: Bring up eth2
+  shell: "ifup eth2"
+  become: true
+  ignore_errors: True
+  tags:
+    - ospd-ports
+  when: new_state == "present" and use_existing_external_network == "false"
+
+- name: Bring down eth2
+  shell: "ifdown eth2"
+  become: true
+  tags:
+    - ospd-ports
+  when: new_state == "absent"  and use_existing_external_network == "false"
+  ignore_errors: true
+
+- name: Delete ifcfg files
+  file:
+    path: "{{ item }}"
+    state: "{{ new_state }}"
+  become: yes
+  with_items:
+    - /etc/sysconfig/network-scripts/ifcfg-eth2
+  tags:
+    - ospd-ports
+  when: new_state == "absent"

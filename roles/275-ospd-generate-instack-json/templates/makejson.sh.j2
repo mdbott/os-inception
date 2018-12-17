@@ -1,0 +1,59 @@
+#!/bin/bash
+
+
+cat << EOF > /tmp/nodes.json
+{
+  "nodes": [
+EOF
+
+COUNT=$(openstack --os-cloud {{ os_cluster }} port list | grep provisioning | grep {{ os_project }} | grep -v ospd | awk '{print $4,$5,$6}' | wc -l )
+
+IFS=$'\n'
+for i in $(openstack --os-cloud {{ os_cluster }} port list | grep provisioning | grep {{ os_project }} | grep -v ospd | grep -v ceph | grep -v bastion | awk '{print $4,$5,$6}' | sort ); do
+	NODE=$(echo $i | cut -d '|' -f 1 );
+        NODE_NAME=$(echo $NODE | sed -e 's/_provisioning//' -e 's/_/-/g' -e 's/ $//')
+	NODE_CLASS=$(echo $NODE | cut -d '_' -f 3 | tr -d "[:blank:]")
+	NODE_INDEX=$(echo $NODE | cut -d '_' -f 4 | tr -d "[:blank:]")
+	NODE_SHORT=$NODE_CLASS-$NODE_INDEX
+	NODE_INDEX_IRONIC=$(($NODE_INDEX-1))
+	IRONIC_TAG=$NODE_CLASS-$NODE_INDEX_IRONIC
+	MAC=$(echo $i | cut -d '|' -f 2| tr -d "[:blank:]");
+cat << EOF >> /tmp/nodes.json
+    {
+      "capabilities": "node:$IRONIC_TAG",
+      "cpu": "2",
+      "memory": "32768",
+      "disk": "40",
+      "pm_user": "{{ ironic_virtual_ipmi.user }}",
+      "pm_password": "{{ ironic_virtual_ipmi.password }}",
+      "pm_addr": "{{ os_cluster_keystone_publicurl }}/$NODE_NAME",
+      "arch": "x86_64",
+      "name": "$NODE_SHORT",
+      "pm_type": "pxe_ipmitool",
+      "mac": [
+        "$MAC"
+      ]
+EOF
+if [ $COUNT -gt 1 ];
+then
+cat << EOF >> /tmp/nodes.json
+    },
+EOF
+else
+cat << EOF >> /tmp/nodes.json
+    }
+EOF
+fi;
+COUNT=$(($COUNT-1))
+done
+
+cat << EOF >> /tmp/nodes.json
+  ]
+}
+EOF
+
+
+#-------------------------------------------------------------------------------
+# Remove the comma from the last few lines of the output file
+#-------------------------------------------------------------------------------
+sed -i "$(( $(wc -l < /tmp/nodes.json ) - 4)),\$s/,//g" /tmp/nodes.json

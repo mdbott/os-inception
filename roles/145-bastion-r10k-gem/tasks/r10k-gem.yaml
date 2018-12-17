@@ -1,0 +1,10 @@
+- name: Ensure r10k rubygem is {{ new_state }}
+  gem:
+    name: r10k
+    state: "{{ new_state }}"
+    user_install: no
+  become: yes
+  when: gem_install==true
+  tags:
+    - r10k
+    - templates

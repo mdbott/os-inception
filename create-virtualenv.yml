@@ -1,0 +1,9 @@
+- name: Python infrastructure
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 005-virtualenv-setup
+      new_state: "{{ state }}"

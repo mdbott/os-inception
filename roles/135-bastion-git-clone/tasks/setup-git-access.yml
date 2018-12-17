@@ -1,0 +1,26 @@
+---
+
+- name: Ensure git ssh confguration is present
+  blockinfile:
+    dest: ~/.ssh/config
+    create: yes
+    marker: "# {mark} git access "
+    content: |
+      Host "{{ git_repo_server }}"
+        User git
+        StrictHostKeyChecking no
+        UserKnownHostsFile=/dev/null
+        IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
+        IdentitiesOnly yes
+  become: false
+  tags:
+    - git-clone
+
+- name: fix permissions on ssh public key file
+  file:
+    path: "/home/{{ bastion_user }}/.ssh/config"
+    mode: 0600
+    owner: "{{ bastion_user }}"
+    group: "{{ bastion_user_group }}"
+  tags:
+    - git-clone

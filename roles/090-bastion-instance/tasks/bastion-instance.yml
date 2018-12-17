@@ -1,0 +1,66 @@
+---
+
+- name: Ensure the bastion instance for project {{ os_project }} is "{{ new_state }}"
+  os_server:
+    state: "{{ new_state }}"
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_ssh_pass }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    name: "{{ prefix}}-{{ node_type}}"
+    image: "{{ nodes[node_type].image }}"
+    key_name: "{{ key_name }}"
+    timeout: "{{ instance_creation_timeout }}"
+    wait: "{{ nodes[node_type].wait }}"
+    flavor: "{{ nodes[node_type].flavor }}"
+    auto_ip: "{{ nodes[node_type].auto_ip }}"
+    security_groups: "{{ nodes[node_type].secgroup }}"
+    availability_zone: "{{ instance_az }}"
+    nics:
+      - port-name: "{{ prefix }}_external_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_provisioning_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_storage_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_internalapi_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_cloud_access"
+    meta:
+      group: "{{ node_type }}"
+  with_sequence:
+    count="{{nodes[node_type].count}}"
+  tags:
+    - bastion-instance
+    - infrastructure
+  when: cloud_access=="private"
+
+- name: Ensure the bastion instance for project {{ os_project }} is "{{ new_state }}"
+  os_server:
+    state: "{{ new_state }}"
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_ssh_pass }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    name: "{{ prefix}}-{{ node_type}}"
+    image: "{{ nodes[node_type].image }}"
+    key_name: "{{ key_name }}"
+    timeout: "{{ instance_creation_timeout }}"
+    wait: "{{ nodes[node_type].wait }}"
+    flavor: "{{ nodes[node_type].flavor }}"
+    auto_ip: "{{ nodes[node_type].auto_ip }}"
+    security_groups: "{{ nodes[node_type].secgroup }}"
+    availability_zone: "{{ instance_az }}"
+    nics:
+      - port-name: "{{ prefix }}_external_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_provisioning_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_storage_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_internalapi_{{ node_type }}_{{ item }}"
+    meta:
+      group: "{{ node_type }}"
+  with_sequence:
+    count="{{nodes[node_type].count}}"
+  tags:
+    - bastion-instance
+    - infrastructure
+  when: cloud_access=="public"

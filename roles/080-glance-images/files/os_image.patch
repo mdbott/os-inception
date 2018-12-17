@@ -1,0 +1,43 @@
+*** /usr/lib/python2.7/site-packages/ansible/modules/cloud/openstack/os_image.py.orig	2017-11-09 18:40:43.103923460 -0500
+--- /usr/lib/python2.7/site-packages/ansible/modules/cloud/openstack/os_image.py	2017-11-09 18:43:58.640923460 -0500
+***************
+*** 164,172 ****
+
+          if module.params['state'] == 'present':
+              if not image:
+                  image = cloud.create_image(
+                      name=module.params['name'],
+-                     id=module.params['id'],
+                      filename=module.params['filename'],
+                      disk_format=module.params['disk_format'],
+                      container_format=module.params['container_format'],
+--- 164,174 ----
+
+          if module.params['state'] == 'present':
+              if not image:
++                 kwargs={}
++                 if module.params['id'] is not None:
++                     kwargs['id'] = module.params['id']
+                  image = cloud.create_image(
+                      name=module.params['name'],
+                      filename=module.params['filename'],
+                      disk_format=module.params['disk_format'],
+                      container_format=module.params['container_format'],
+***************
+*** 174,180 ****
+                      timeout=module.params['timeout'],
+                      is_public=module.params['is_public'],
+                      min_disk=module.params['min_disk'],
+!                     min_ram=module.params['min_ram']
+                  )
+                  changed = True
+                  if not module.params['wait']:
+--- 176,183 ----
+                      timeout=module.params['timeout'],
+                      is_public=module.params['is_public'],
+                      min_disk=module.params['min_disk'],
+!                     min_ram=module.params['min_ram'],
+!                     **kwargs
+                  )
+                  changed = True
+                  if not module.params['wait']:

@@ -1,0 +1,12 @@
+---
+- name: Ensure undercloud packages and dependencies are {{ new_state }}
+  yum:
+    name: "{{ undercloud_packages }}"
+    state: "{{ new_state }}"
+  async: "{{ yum_timeout }}"
+  poll: "{{ yum_poll }}"
+  become: true
+  tags:
+    - tripleo-packages
+    - undercloud
+    - rebuild

@@ -1,0 +1,5 @@
+---
+# tasks file for 080-rhn-register
+- include: overcloud-images.yml
+- include: overcloud-containers.yml
+  when: osp_version==13

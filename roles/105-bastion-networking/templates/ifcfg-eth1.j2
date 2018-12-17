@@ -1,0 +1,9 @@
+# created by ansible
+BOOTPROTO=static
+DEVICE=eth1
+ONBOOT=yes
+IPADDR=192.0.2.{{ last_octet.bastion.bastion_1 }}
+NETMASK=255.255.255.0
+PEERDNS=no
+TYPE=Ethernet
+USERCTL=no

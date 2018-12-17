@@ -1,0 +1,34 @@
+---
+
+- name: Ensuring {{ os_project }} keystone project is {{ new_state }}
+  os_project:
+    cloud: "{{ os_cluster_admincreds }}"
+    cacert: "{{ cacertfile }}"
+    state: "{{ new_state }}"
+    name: "{{ os_project }}"
+    description: "{{ os_project}} project."
+    domain_id: "{{ user_domain_id }}"
+    enabled: true
+    endpoint_type: "{{ endpoint_type }}"
+  # environment:
+  #   OS_CLIENT_CONFIG_FILE: /home/{{ bastion_user }}/.config/openstack/clouds.yml
+  when: create_project==true and identity_api_version==3
+  tags:
+    - project
+    - infrastructure
+
+- name: Ensuring {{ os_project }} keystone project is {{ new_state }}
+  os_project:
+    cloud: "{{ os_cluster_admincreds }}"
+    cacert: "{{ cacertfile }}"
+    state: "{{ new_state }}"
+    name: "{{ os_project }}"
+    description: "{{ os_project}} project."
+    enabled: true
+    endpoint_type: "{{ endpoint_type }}"
+  # environment:
+  #   OS_CLIENT_CONFIG_FILE: /home/{{ bastion_user }}/.config/openstack/clouds.yml
+  when: create_project==true and identity_api_version==2
+  tags:
+    - project
+    - infrastructure

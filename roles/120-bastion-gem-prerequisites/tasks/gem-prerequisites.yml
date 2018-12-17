@@ -1,0 +1,39 @@
+
+- name:  Ensure {{ bastion_user }} .gemrc are {{ new_state}}
+  template:
+    src: gemrc.j2
+    dest: ~/.gemrc
+
+
+- name: Ensure Gemfile for bundler install is {{ new_state }}
+  template:
+    src: Gemfile
+    dest: "/home/{{ bastion_user }}/Gemfile"
+  become: true
+  when: gem_install==true
+
+- name: Ensure gem prerequisites are {{ new_state }}
+  bundler:
+    gemfile: "/home/{{ bastion_user }}/Gemfile"
+    user_install: no
+    state: "{{ new_state }}"
+  become: true
+  when: gem_install==true
+
+- name: Ensure additional faraday gem versions are {{ new_state }}
+  gem:
+    name: faraday
+    version: 0.13.1
+    user_install: no
+    state: "{{ new_state }}"
+  become: true
+  when: gem_install==true
+
+- name: Ensure additional semantic_puppet gem versions are {{ new_state }}
+  gem:
+    name: semantic_puppet
+    version: 1.0.2
+    user_install: no
+    state: "{{ new_state }}"
+  become: true
+  when: gem_install==true

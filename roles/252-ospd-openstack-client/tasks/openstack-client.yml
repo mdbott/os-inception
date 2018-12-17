@@ -1,0 +1,55 @@
+---
+
+- name: Ensure openstack client configuration directory is present
+  file:
+    name: ~/.config/openstack
+    state: directory
+  become: yes
+  become_user: stack
+  tags:
+    - ospd-openstack-client
+
+- name: fetch the undercloud access key onto the bastion host
+  fetch:
+    src: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+    dest: /tmp/cm-local-ca.pem
+    flat: yes
+  become: yes
+  tags:
+    - ospd-openstack-client
+
+- name: copy undercloud cacert into position
+  copy:
+    src: /tmp/cm-local-ca.pem
+    dest: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  delegate_to: localhost
+  tags:
+    - ospd-openstack-client
+
+- name:  Ensure openstack client configuration is present
+  copy:
+    src: "/home/{{ hostvars['localhost']['ansible_user'] }}/.config/openstack/clouds.yaml"
+    dest: "/home/stack/.config/openstack/clouds.yaml"
+    owner: stack
+    group: stack
+    mode: 0644
+  become: yes
+  become_user: stack
+  tags:
+    - ospd-openstack-client
+
+- name: Ensure user credentials file is present
+  copy:
+    src: "/home/{{ hostvars['localhost']['ansible_user'] }}/{{ os_project }}rc"
+    dest: "/home/stack/{{ os_project }}rc"
+    owner: stack
+    group: stack
+    mode: 0644
+  become: yes
+  become_user: stack
+  tags:
+    - ospd-openstack-client

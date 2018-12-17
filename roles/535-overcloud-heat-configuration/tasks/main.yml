@@ -1,0 +1,4 @@
+---
+# tasks file for 080-rhn-register
+- include: heat-configuration.yml
+- include: overcloud-ssh-access.yml

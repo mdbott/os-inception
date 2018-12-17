@@ -1,0 +1,8 @@
+---
+- include: neutron-ports.yml
+  with_items:
+    - "{{ node_types }}"
+  loop_control:
+    loop_var: node_type
+- include: cloud-access-ports.yml
+  when: cloud_access=="private"

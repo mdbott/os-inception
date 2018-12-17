@@ -1,0 +1,4 @@
+---
+# tasks file for 115-pip-prerequisites
+- include: remove-conflicting-rpms.yml
+- include: pip-prerequisites.yml

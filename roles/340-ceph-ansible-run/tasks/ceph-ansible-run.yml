@@ -1,7 +1,0 @@
-- name: Run ceph-ansible
-  shell: "ansible-playbook site.yml"
-  args:
-    chdir: /usr/share/ceph-ansible
-  tags:
-    - ceph-ansible-run
-

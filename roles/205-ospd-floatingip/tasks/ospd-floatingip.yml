@@ -1,0 +1,45 @@
+---
+- name: Gathering facts on {{ node_type }} instance
+  os_server_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    server: "{{ prefix }}-{{ node_type }}-1"
+    detailed: true
+  tags:
+    - core
+    - ospd-facts
+
+# - name: Get a json object containing instance networks
+#   shell: "openstack --os-cloud {{ os_cluster }} server list -c Name -c Networks -f json | jq -r 'def stripchars(banish): explode - (banish | explode) | implode;map( . as $o | {($o.Name):($o.Networks)}) | .[] | to_entries | .[]| .value |= (split(\" \")|map(split(\"=\")|  if (.[1]) == null then {\"floating\": (.[0]| stripchars(\";,\"))} else {(.[0]| stripchars(\";,\")): (.[1]| stripchars(\";,\"))} end ) |add )| [.] | from_entries'| jq -s '.|add'"
+#   register: result
+#   tags:
+#     - ospd-float-attach
+#     - rebuild
+#
+# - name: set the instance_network fact
+#   set_fact:
+#     instance_networks: "{{ result.stdout | from_json }}"
+#   tags:
+#     - ospd-float-attach
+#     - rebuild
+
+- name: set the undercloud instance name fact
+  set_fact:
+    undercloud_instance: "{{  prefix }}-ospd-1"
+  tags:
+    - ospd-float-attach
+    - rebuild
+
+
+
+- name: Ensure that the floating ip for the ospd instance is "{{ new_state }}"
+  os_floating_ip:
+    cloud: "{{ os_cluster }}"
+    state: "{{ new_state }}"
+    server: "{{ prefix }}-ospd-1"
+    network: "{{ external_network }}"
+    nat_destination: "{{ prefix }}_external"
+    reuse: yes
+  tags:
+    - ospd-float-attach
+    - rebuild

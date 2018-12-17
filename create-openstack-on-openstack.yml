@@ -1,3 +1,11 @@
+---
+
+##################################################
+#                                                #
+# Deploy the ceph, ospd & overcloud instances    #
+#                                                #
+##################################################
+
 - name: OpenStack infrastructure
   hosts:
     - localhost
@@ -5,47 +13,29 @@
     state: present
   tasks:
   roles:
-    - role: 010-keystone-project
+    #- role: 010-merge-os-creds
+    - role: 007-set-running-user
+    - role: 200-nova-instances
       new_state: "{{ state }}"
-    - role: 015-keystone-role
+      when: preprovisioned_nodes|bool == false
+    - role: 202-preprovisioned-nova-instances
       new_state: "{{ state }}"
-    - role: 020-openstack-quota
+      when: preprovisioned_nodes|bool == true
+    - role: 205-ospd-floatingip
       new_state: "{{ state }}"
-    - role: 025-ospd-floatingip-create
+    - role: 210-ospd-inventory-update
       new_state: "{{ state }}"
-    - role: 030-neutron-networks
+    - role: 001-baremetal-cloud-cacert-import
       new_state: "{{ state }}"
-    - role: 035-neutron-subnets
-      new_state: "{{ state }}"
-    - role: 040-neutron-ports
-      new_state: "{{ state }}"
-    - role: 045-disable-portsec
-    - role: 050-nova-flavors
-      new_state: "{{ state }}"
-    - role: 052-nova-flavors-access
-    - role: 053-temp-files
-    - role: 055-glance-images
-      new_state: "{{ state }}"
-    - role: 058-nova-secgroup-rules
-      new_state: "{{ state }}"
-    - role: 059-server-groups
-      new_state: "{{ state }}"
-    - role: 060-nova-instances
-      new_state: "{{ state }}"
-    - role: 070-update-inventory
-      new_state: "{{ state }}"
-    - role: 075-ospd-floatingip
-      new_state: "{{ state }}"
-#    - role: 095-nova-stop
-    - role: 160-instack-json
-      new_state: "{{ state }}"
-    - role: 185-cacert-import
-      new_state: "{{ state }}"
-    - role: 190-bastion-ports
-      new_state: "{{ state }}"
-    - role: 195-bastion-networking
-      new_state: "{{ state }}"
-#    - role: 200-bastion-hosts
+      access_user: "{{ bastion_user }}"
+      access_user_group: "{{ bastion_user_group }}"
+    - role: 160-bastion-load-clouddata
+
+##################################################
+#                                                #
+# Configure the undercloud on the ospd instances #
+#                                                #
+##################################################
 
 - name: OpenStack undercloud
   hosts:
@@ -54,29 +44,181 @@
     state: present
   tasks:
   roles:
-    - role: 079-yum-repos
+    - role: 220-ospd-yum-repos
       new_state: "{{ state }}"
-#    - role: 080-subscription-manager
-#      new_state: "{{ state }}"
-    - role: 090-yum-update
-    - role: 100-yum-install
+    - role: 225-ospd-networking
       new_state: "{{ state }}"
-    - role: 110-stack-user
+    - role: 230-ospd-yum-update
+    - role: 235-ospd-package-install
       new_state: "{{ state }}"
-    - role: 120-undercloud-config
+    - role: 240-ospd-stack-user
       new_state: "{{ state }}"
-    - role: 130-undercloud-install
+    - role: 245-ospd-undercloud-config
       new_state: "{{ state }}"
-    - role: 140-overcloud-images
+    - role: 250-ospd-undercloud-install
       new_state: "{{ state }}"
-    - role: 145-overcloud-flavor-update
-    - role: 150-ironic-config
+    - role: 252-ospd-openstack-client
+    - role: 255-ospd-overcloud-images
       new_state: "{{ state }}"
-    - role: 170-instack-copy
+    - role: 260-ospd-overcloud-flavor-update
+    - role: 265-ospd-ironic-config
       new_state: "{{ state }}"
-    - role: 180-ospd-networking
-    - role: 185-cacert-import
+    - role: 001-baremetal-cloud-cacert-import
       new_state: "{{ state }}"
-    - role: 187-ospd-nat
-    - role: 270-local-templates-copy
-    - role: 280-deploy-script
+      access_user: "{{ ospd_user }}"
+      access_user_group: "{{ ospd_user_group }}"
+    - role: 165-dev-cloud-cacert-import
+      new_state: "{{ state }}"
+      bastion_host: localhost
+    - role: 275-ospd-generate-instack-json
+      new_state: "{{ state }}"
+    - role: 280-ospd-instack-copy
+      new_state: "{{ state }}"
+    - role: 290-ospd-create-deployment-scripts
+    - role: 295-ospd-deploy-overcloud-tripleo-artifacts
+
+
+##################################################
+#                                                #
+# Configure the ceph cluster                     #
+#                                                #
+##################################################
+
+- name: Update ceph inventory
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 300-ceph-inventory
+- name: Ceph setup
+  hosts:
+    - osds
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 305-ceph-networking
+      new_state: "{{ state }}"
+    - role: 310-ceph-repos
+      new_state: "{{ state }}"
+
+
+- name: Run ceph-ansible configuration
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 315-ceph-ansible
+      new_state: "{{ state }}"
+
+- name: Run ceph-ansible deployment
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 320-ceph-ansible-run
+
+- name: Ceph key setup
+  hosts:
+    - ceph-bootstrap
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 325-ceph-openstack-key
+
+##################################################
+#                                                #
+# Configure the preprovisioned overcloud nodes   #
+#                                                #
+##################################################
+
+- name: Update overcloud inventory
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tags:
+    - preprovisioned-nodes
+  tasks:
+  roles:
+    - role: 500-overcloud-inventory
+      when: preprovisioned_nodes|bool == true
+- name: pacemaker node network setup
+  hosts:
+    - pacemaker
+  vars:
+    state: present
+  tags:
+    - preprovisioned-nodes
+  tasks:
+  roles:
+    - role: 505-pacemaker-networking
+      new_state: "{{ state }}"
+      when: preprovisioned_nodes|bool == true
+- name: service node network setup
+  hosts:
+    - service
+  vars:
+    state: present
+  tags:
+    - preprovisioned-nodes
+  tasks:
+  roles:
+    - role: 510-service-networking
+      new_state: "{{ state }}"
+      when: preprovisioned_nodes|bool == true
+- name: compute node network setup
+  hosts:
+    - compute
+  vars:
+    state: present
+  tags:
+    - preprovisioned-nodes
+  tasks:
+  roles:
+    - role: 515-compute-networking
+      new_state: "{{ state }}"
+      when: preprovisioned_nodes|bool == true
+- name: configure overcloud repos
+  hosts:
+    - overcloud
+  vars:
+    state: present
+  tags:
+    - preprovisioned-nodes
+  tasks:
+  roles:
+    - role: 520-overcloud-repos
+      new_state: "{{ state }}"
+      when: preprovisioned_nodes|bool == true
+    - role: 525-overcloud-package-install
+      new_state: "{{ state }}"
+      when: preprovisioned_nodes|bool == true
+    - role: 530-overcloud-director-access
+      new_state: "{{ state }}"
+      when: preprovisioned_nodes|bool == true
+
+
+- name: OpenStack undercloud
+  hosts:
+    - ospd
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 535-overcloud-heat-configuration
+      new_state: "{{ state }}"
+      when: preprovisioned_nodes|bool == true
+
+##################################################
+#                                                #
+# Deploy the overcloud                           #
+#                                                #
+##################################################

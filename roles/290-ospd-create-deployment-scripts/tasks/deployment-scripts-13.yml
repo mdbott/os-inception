@@ -1,0 +1,29 @@
+---
+
+- name: Create the osp13 deploy script
+  template:
+    src: "templates/deploy-osp13.sh.j2"
+    dest: /home/{{ stack_user }}/deploy-osp13.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  when: preprovisioned_nodes|bool == false
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
+
+- name: Create the osp13 pre-provisioned node deployment script
+  template:
+    src: "templates/deploy-osp13-preprovisioned.sh.j2"
+    dest: /home/{{ stack_user }}/deploy-osp13-preprovisioned.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  when: preprovisioned_nodes|bool == true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild

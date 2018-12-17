@@ -1,0 +1,39 @@
+---
+
+- name: "Ensure the bastion cloud access neutron port for vlan27 is {{ new_state }}"
+  os_port:
+    state: "{{ new_state }}"
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ admin_user }}"
+      password: "{{ admin_user_password }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    name: "{{ prefix }}_cloud_access"
+    network: "{{ cloud_access_network }}"
+    wait: "{{ port_wait }}"
+    fixed_ips:
+      - ip_address: "{{ cloud_access_ip_address }}"
+  tags:
+    - cloud-access-port
+    - infrastructure
+  ignore_errors: true
+
+- name: "Ensure the ospd cloud access neutron port for vlan27 is {{ new_state }}"
+  os_port:
+    state: "{{ new_state }}"
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ admin_user }}"
+      password: "{{ admin_user_password }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    name: "{{ prefix }}_ospd_cloud_access"
+    network: "{{ cloud_access_network }}"
+    wait: "{{ port_wait }}"
+    fixed_ips:
+      - ip_address: "{{ ospd_cloud_access_ip_address }}"
+  tags:
+    - cloud-access-port
+    - infrastructure
+  ignore_errors: true

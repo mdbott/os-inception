@@ -1,0 +1,28 @@
+---
+
+- name: get the username running the deploy
+  local_action: command whoami
+  register: username_on_the_host
+  tags:
+    - running-user
+    - always
+
+- debug:
+    var: username_on_the_host
+  tags:
+    - running-user
+    - always
+
+- name: load clouddata for the {{ os_project }} cloud into a cloud variable.
+  set_fact:
+    ansible_user: "{{ username_on_the_host.stdout }}"
+  tags:
+    - running-user
+    - always
+
+- name: load clouddata for the {{ os_project }} cloud into a cloud variable.
+  debug:
+    var: ansible_user
+  tags:
+    - running-user
+    - always

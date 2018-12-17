@@ -1,0 +1,22 @@
+---
+
+
+- name: Import the ironic nodes into the undercloud
+  shell: "openstack --os-cloud undercloud baremetal import --json /home/stack/instack.json"
+  become: yes
+  become_user: stack
+  #ignore_errors: true
+  #async: 120
+  #poll: 10
+  tags:
+    - overcloud-prep
+
+- name: Configure the boot state for the baremetal nodes
+  shell: "openstack --os-cloud undercloud baremetal configure boot"
+  become: yes
+  become_user: stack
+  #ignore_errors: true
+  #async: 120
+  #poll: 10
+  tags:
+    - overcloud-prep

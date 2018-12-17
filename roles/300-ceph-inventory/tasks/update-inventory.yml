@@ -1,0 +1,99 @@
+- name: Gathering facts on instances
+  os_server_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    server: "{{ prefix }}-{{ node_type }}*"
+    detailed: true
+  tags:
+    - ceph-inventory
+
+- name: Get a json object containing instance networks
+  shell: "openstack --os-cloud {{ os_cluster }} server list -c Name -c Networks -f json | jq -r 'def stripchars(banish): explode - (banish | explode) | implode;map( . as $o | {($o.Name):($o.Networks)}) | .[] | to_entries | .[]| .value |= (split(\" \")|map(split(\"=\")|  if (.[1]) == null then {\"floating\": (.[0]| stripchars(\";,\"))} else {(.[0]| stripchars(\";,\")): (.[1]| stripchars(\";,\"))} end ) |add )| [.] | from_entries'| jq -s '.|add'"
+  #environment: "{{ openstack_user_auth_env }}"
+  register: result
+  tags:
+    - ceph-inventory
+
+- name: set the instance_network fact
+  set_fact:
+    instance_networks: "{{ result.stdout | from_json }}"
+  tags:
+    - ceph-inventory
+
+- name: set the bootstrap instance name fact
+  set_fact:
+    bootstrap_instance: "{{  prefix }}-ceph-1"
+  tags:
+    - ceph-inventory
+
+- name: set the storage_network fact
+  set_fact:
+    external_network: "{{  prefix }}_external"
+  tags:
+    - ceph-inventory
+
+- debug:
+    msg: "{{ instance_networks[bootstrap_instance][external_network] }}"
+  tags:
+    - ceph-inventory
+
+- debug:
+    msg: '{{ openstack_servers }}'
+  tags:
+    - ceph-inventory
+
+
+- name: Ensure ceph instances for project {{ prefix }} are {{ new_state }} in the inventory
+  add_host:
+    hostname: "{{ item.name }}"
+    ansible_ssh_host: "{{ instance_networks[item.name][external_network] }}"
+    ansible_ssh_user: cloud-user
+    ansible_become: true
+    become_user: root
+    become_method: sudo
+    groups:
+      - osds
+      - mons
+      - all
+  with_items: "{{ openstack_servers }}"
+  tags:
+    - ceph-inventory
+
+- name: create ceph-ansible hosts  directory
+  file:
+    dest: "~/ceph-ansible/hosts"
+    state: directory
+    mode: 0755
+  tags:
+    - ceph-inventory
+
+
+- name: Add the ceph servers to ~/ceph-ansible/hosts/inventory for ceph-ansible run
+  template:
+    src: "hosts.j2"
+    dest: ~/ceph-ansible/hosts/inventory
+  tags:
+    - ceph-inventory
+
+- name: Gathering facts on ceph bootstrap instance
+  os_server_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    server: "{{ prefix }}-ceph-1"
+    detailed: true
+  tags:
+    - ceph-inventory
+
+- name: Ensure ceph bootstrap instance for project {{ os_project }} are {{ new_state }} in the inventory
+  add_host:
+    hostname: "{{ bootstrap_instance }}"
+    ansible_ssh_host: "{{ instance_networks[bootstrap_instance][external_network] }}"
+    ansible_ssh_user: cloud-user
+    ansible_become: true
+    become_user: root
+    groups:
+      - ceph-bootstrap
+      - all
+  when: not(openstack_servers[0] is undefined)
+  tags:
+    - ceph-inventory

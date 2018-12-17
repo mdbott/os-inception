@@ -1,7 +1,7 @@
 OS-Inception: you have to go deeper!
 =========
 
-OS-Inception is a set of Ansible 2 roles and playbooks that assist in setting up a Red Hat OpenStack Platform Cloud on an existing Overcloud, including a set of 3 Red Hat Ceph Storage clustered servers providing storage in the virtual environment. 
+OS-Inception is a set of Ansible 2 roles and playbooks that assist in setting up a Red Hat OpenStack Platform Cloud on an existing Overcloud, including a set of 3 Red Hat Ceph Storage clustered servers providing storage in the virtual environment.
 
 This is ideal for test environments or where developers need to work on the underlying OpenStack infrastructure, but the work in greatly enhanced when the environments are separated so that a broken component in one developer's lab doesn't break everyone else's development environment. It truly implements an OpenStack on OpenStack set of systems. Also, note that these playbooks make full use of Composeable roles to split out Pacemaker and SystemD Controller nodes. This was done to make troubleshooting easier by making the traffic between these services easier to track, however you may choose to recombine these into a single controller node by modifying the playbooks.
 
@@ -19,7 +19,7 @@ In order for OS-Inception to work you will need an existing OpenStack cluster wi
 +-----------------------+---------------+---------------------------+---------------------------+
 | ID                    | Name          |   Baremetal Project Name  |  Initial Image            |
 +-----------------------+---------------+---------------------------+---------------------------+
-| os-inception		| m1.small	|   development-admin       |  rhel7 or fedora27 qcow   |
+| os-inception		| m1.small	|  os                         |  rhel7 or fedora27 qcow   |
 | os-compute-2		| os.compute	|   os                      |  pxeboot.img              |
 | os-compute-1		| os.compute	|   os                      |  pxeboot.img              |
 | os-ceph-3		| os.ceph	|   os                      |  rhel7 or fedora27 qcow   |
@@ -69,209 +69,269 @@ Software:
 - EPEL repository (if using RHEL)
 - pip
 - jq
-- Ansible 2 (tested with 2.3.0-2.3.2)
+- Ansible 2 (tested with 2.6.0)
 
 Setup Instructions
 ==============
 _in this example, we call our new OS-Inception openstack "os1"_
 
+The following instructions can be used to build or rebuild a dev cloud using os-inception.
+## Prerequisites
 
-0. Environment
 
-- switch to v3 by commenting/uncommenting the appropriate section in os-inception/environment/group_vars/all/all
+- A system running RHEL7.
+- The ```os-inception``` directory cloned to the home directory from the git branch ```allinone```
 
-### Keystone V3 only ###
-### End Keystone V3 only ###
+    ```
+    git clone -b allinone ssh://git@gitlocation.server.example.com:2222/UtilityCloud/os-inception.git
+    ```
+- The following packages installed: git, ansible, python-virtualenvwrapper, gcc,make, python-devel
 
-### Keystone V2 only ###
-### End Keystone V2 only ###
+    ```
+    sudo yum install -y git ansible python-virtualenvwrapper gcc make python-devel
+    ```
 
-It is recommended to test on V2 first if possible, as the vast majority of develpoment has been done on V2
+- A Python virtualenv activated with the following command
 
-- go through os-inception/environment/group_vars/all/all and review everything
+    ```
+    . /usr/bin/virtualenvwrapper.sh
+    ```
 
-AND
+- Passwordless sudo for the system from your current account
 
-- find and replace external_net in code:
+- Ensure that the the following entries are correct for the cloud you are using
+  - ```os_cluster_keystone_publicurl```
+  - ```os_cluster_keystone_adminurl```
+  - ```cacert```
 
-[cloud-user@os1-inception roles]$ grep external_net . -R
-./075-ospd-floatingip/tasks/ospd-floatingip.yml:     fixed_address: "{{ openstack_servers[0].addresses.external_net[0].addr }}"
-./305-ceph-inventory/tasks/update-inventory.yml:    ansible_ssh_host: "{{ item.addresses.external_net[0].addr}}"
-./305-ceph-inventory/tasks/update-inventory.yml:    ansible_ssh_host: "{{ openstack_servers[0].addresses.external_net[0].addr }}"
-./305-ceph-inventory/templates/hosts.j2:{{ server.addresses.external_net[0].addr}}
-./305-ceph-inventory/templates/hosts.j2:{{ server.addresses.external_net[0].addr}}
+Note that if you update and of these settings at any time you must re-run the ```create-tenant-and-bastion.yaml``` playbook to have the new settings applied. This is probably a good time to update the clouddata repo with details for your new dev cloud.
 
 
-1. BAREMETAL CLOUD: create a new VM on external_net, with a floating IP
+- Review everything in ```os-inception/group_vars/all/all``` if you are setting up to build on a new cloud.
+- Configure the Vault
+    - Use the vault template to create the password vault to encrypt the cloud admin credentials
 
-nova boot --image rhel-server-7.4-x86_64-kvm.qcow2 --flavor m1.small  --key ftkey --nic net-name=external_net os-inception
+        ```
+        cd os-inception
+        cp group_vars/vault/vault_passwords.yml.template group_vars/vault/vault_passwords.yml
+        ```
 
-nova floating-ip-associate os-inception 10.0.0.101
+    - Edit the ```vault_passwords.yml``` file and update with  the admin credentials for the cloud.
 
+        ```
+        vim group_vars/vault/vault_passwords.yml
+        ```
 
-2. BASTION: clone inception repo
+    - The edit file will now be encrypted to protect the credential information.
 
-git clone https://github.com/snowjet/os-inception.git
+        ```
+        ansible-vault encrypt group_vars/vault/vault_passwords.yml
+        New Vault password:
+        Confirm New Vault password:
+        Encryption successful
+        ```
 
+## Run Ansible Playbooks
 
-3. BAREMETAL CLOUD: make sure that the OSPd IP and the bastion host IP matches the floats configured in clouddata. Make sure the project (osN) matches clouddata.
+Run these playbooks in the ```os-inception/``` directory after the steps above have been completed.
 
-4. BASTION: sudo curl http://yum.example.com/localmirror.repo -o /etc/yum.repos.d/localmirror.repo
+- Run the playbook to setup the virtualenv Python environment. This playbook creates ```.virtualenvs/openstacksdk2``` if it doesn't exist already.
 
-5. BASTION: sudo yum -y install git ansible
+    ```
+    ansible-playbook create-virtualenv.yml -vv
+    ```
 
-6. BASTION: verify that:
+- Select this Python virtualenv to work on openstacksdk2. This is virtualenv contains all of the correct Python dependencies for the tasks in the Ansible playbooks that will be run.
 
-- the project_name 
-- OSPd float 
+    ```
+    workon openstacksdk2
+    ```
 
-are correct and match clouddata. The float must not yet exist in another project!
+- Run the playbook to create the dev cloud tenant and bastion instance. Replace ```<project_name>``` with the name of your cloud/project for example ```os_project=os6```
 
+    ```
+    ansible-playbook create-tenant-and-bastion.yml -vv --extra-vars "os_project=<project_name">
+    ```
 
-7. BASTION: cd os-inception; ansible-playbook env-setup.yml
+- Note that in the case where you are using your own account to access the baremetal cloud you should edit ```group_vars/all/project``` to set and comment out the following lines
 
-IF REDEPLOYING THE LAB: make sure the nodes you want to avoid have compute serivce switched off temporarily 
-IF REDEPLOYING THE LAB: rebuild the overcloud systems with the pxeboot.img ( a nova rebuild command should suffice against each host )
+    - Set:
+        - ```use_running_user: true```
+    - Comment out:
+        - ```ansible_user```
+        - ```ansible_ssh_pass```
 
-8. BASTION: ansible-playbook create-openstack-on-openstack.yml
+- The ```create-tenant-and-bastion.yml``` playbook can then be run with the -k option to prompt for your user password.
 
-9. OSPD:
-- IF USING EXTERNAL CEPH:  because we use external ceph, we will skip the ceph playbook. Just verify if the ceph user and key on iron-ceph match [~]$ cat overcloud/puppet-ceph-external.yaml
+    ```
+    ansible-playbook create-tenant-and-bastion.yml -k -vv --extra-vars "os_project=<project_name>"
+    ```
 
-This can be done using:
+- After the ```create-tenant-and-bastion.yml``` has run, login to the newly created and configured bastion instance.
 
-[root ~(OpenStack: baremetal-user@baremetal-inception-project)]# ceph auth list
+    ```
+    ssh os6-bastion
+    ```
 
-…
+- Change into the os-inception directory on the bastion instance and run the ```create-openstack-on-openstack.yml``` playbook
 
-client.openstack
+    ```
+    ansible-playbook create-openstack-on-openstack.yml -vv --extra-vars "os_project=<project_name">
+    ```
 
-       key: abcdefghijl,mnopqrstuvwxYz==
+- **If you are using external Ceph skip the Ceph playbook and instead just verify that the ceph user and key match.**
 
-       caps: [mon] allow r
+    - Run this command on the OpenStack Platform Director (OSPD) instance
 
-       caps: [osd] allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images, allow rwx pool=backups, allow rwx pool=metrics
+    ```
+    cat overcloud/puppet-ceph-external.yaml
+    ```
 
-- IF USING BUILTIN CEPH: BASTION: ansible-playbook setup-ceph.yml
+    - Run this command on Ceph node
 
-10. OSPd: run deploy:
+    ```
+    ceph auth list
 
-* Source creds
+      client.openstack
 
-. stackrc
+           key: AQAcGyVZQHdyMxAAOVk2B8pbTeRtrBcP/r0SbQ==
 
-* Import instack.json
+           caps: [mon] allow r
 
-openstack baremetal import --json instack.json
+           caps: [osd] allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images, allow rwx pool=backups, allow rwx pool=metrics
+    ```
 
-* Configure boot
+- If you are using built-in Ceph then run the Ceph Ansible playbook
 
-Openstack baremetal configure boot
+    ```
+    ansible-playbook ceph-setup.yml -vv
+    ```
 
-* Run deploy
+## Start Overcloud Deploy
 
-./deploy.sh
+**Note that these are going to be added to the create-openstack-on-openstack playbook and should have been run automatically. Leaving in documentation for now**
 
-* OSPD_OTHER_SHELL: monitor when nodes transition to wait_callback
+- On the **Bastion Host** run the following playbook from within the ```os-inception``` directory.
 
-watch “nova list; ironic node-list”
 
-* BASTION Power on all VMs
+    ```
+    ansible-playbook deploy-overcloud.yml -vv --extra-vars "os_project=os1" --skip-tags overcloud-deploy
+    ```
+- SSH to the OSPD (OpenStack Platform Director)
+    ```
+    ssh stack@<project name>-ospd-1
+    ```
 
-nova start $(nova list | grep -v ospd | awk '/os3/ {printf $4 " "}')
+- On the OSPD instance, source bashrc file with the undercloud credentials.
 
-* OTHER_SHELL: monitor when nodes transition to active
+    ```
+    . stackrc
+    ```
 
-* BASTION: Power on all VMs again
+- List "baremetal" nodes to confirm before running deploy script
 
-* Deploy should complete in ~45mins
+    ```
+    openstack baremetal node list
+    ```
 
+- Run deploy
 
-11. BASTION/ospd“steal” stack user’s private key from ospd. Save it to ~/.ssh/heat-admin.key on the bastion
+    ```
+    ./deploy.sh
+    ```
 
-12. BASTION configure ssh client accordingly
+- Deploy should complete in ~45mins
 
-[cloud-user@os-inception ~(OpenStack: ansible@inception-project1)]$ cat .ssh/config 
-<<<
-Host pacemaker*
+- On the **BASTION** instance run the following playbook to configure access to the overcloud from the bastion host:
 
-       User heat-admin
+    ```
+    ansible-playbook overcloud-access-setup.yml  -vv --extra-vars "os_project=os1"
+    ```
 
-       StrictHostKeyChecking no
+## Post Deploy
 
-       UserKnownHostsFile=/dev/null
+**Post deploy playbook makes no changes when I tried to rebuild os6. Is the information below up to date?**
 
-       IdentityFile ~/.ssh/heat-admin.priv
+This Ansible playbook and additonal steps will setup the ```/etc/hosts```, ```~/.ssh/config``` & ```~/.ssh/heat-admin.priv``` on the bastion instance to allow access to the overcloud hosts and make the Horizon dashboard accessible.
 
-Host service*
+- On the **BASTION** instance run the ```stack-post-deploy-all.yaml``` Ansible playbook
 
-       User heat-admin
+    ```
+    ansible environment -a uptime
+    ansible-playbook  stack-post-deploy-all.yml -vv --tags keystonev3,horizon,uc-config
+    ```
 
-       StrictHostKeyChecking no
+- Allow Horizon dashboard access to the overcloud by running the following iptables command **on all of the pacemaker nodes** after deployment.
 
-       UserKnownHostsFile=/dev/null
+    ```
+    iptables -I INPUT 24 -p tcp -m multiport --dports 80,443 -m comment --comment "126 horizon_haproxy" -m state --state NEW -j ACCEPT
+    ```
 
-       IdentityFile ~/.ssh/heat-admin.priv
+- You can then access the Horizon dashboard interface by editing the ssd_config on the bastion host as root
 
-Host compute*
+    ```
+    vim /etc/ssh/sshd_config
+    ```
+- Set ```AllowTcpForwarding``` to yes and then restart sshd on the bastion. From your desktop run the following command before start the Firefox browser and setting the SOCKS proxy to localhost 8088. You will then be able to browse to ```https://10.0.0.100``` to access the Horizon dashboard interface of the development cloud.
 
-       User heat-admin
+    ```
+    ssh -D 8080 <BASTION IP ADDRESS>
+    ```
 
-       StrictHostKeyChecking no
+## Validate
 
-       UserKnownHostsFile=/dev/null
+Manual VM boot or Tempest
 
-       IdentityFile ~/.ssh/heat-admin.priv
+- Tempest can be run on the deployed cloud with
 
-Host *
+    ```
+    ansible-playbook stack-tempest-deploy.yml -vv
+    ```
 
-       User cloud-user
+- After running Tempest look at the log file in ```/home/stack/tempest```
 
-       StrictHostKeyChecking no
 
-       UserKnownHostsFile=/dev/null
+**Note that the ```stack_post_deploy_all.yaml``` Ansible playbook should be run prior to the Tempest tests as it sets various parameters that Tempest needs to run. One extra parameter that needs to be applied across all of the services nodes that is not yet in ```stack_post_deploy_all.yaml``` is**
 
-       IdentityFile ~/.ssh/id_rsa
->>>
+    crudini --set /etc/nova/nova.conf DEFAULT scheduler_default_filters RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,DifferentHostFilter
+    systemctl restart openstack-nova-api.service openstack-nova-scheduler.service
 
-[cloud-user@os-inception ~(OpenStack: ansible@ios-inception-project)]$ 
 
+## Troubleshooting
 
+The playbooks use a rich collection of tags which allow limiting the tasks that are run. For example:
 
-13. BASTION make sure that all the overcloud nodes (IPs visible from undercloud) nodes are defined in /etc/hosts
+- To regenerated service instances only
 
-14. validate - manual VM boot or tempest
+    ```
+    ansible-playbook delete-openstack-on-openstack.yml --tags service-instances
+    ansible-playbook create-openstack-on-openstack.yml --tags service-instances
+    ```
 
+- To regenerate templates (eg after clouddata/icloud-puppet run)
 
-TROUBLESHOOTING
+    ```
+    ansible-playbook create-openstack-on-openstack.yml --tags core,templates
+    ```
 
-The playbook uses a rich collection of tags which allow limiting the tasks that are run. For example:
+- To recreate virtual ceph
 
-To regenerated service instances only:
+    ```
+    ansible-playbook delete-openstack-on-openstack.yml --tags ceph-instances
+    ansible-playbook create-openstack-on-openstack.yml --tags ceph-instances
+    ansible-playbook ceph-setup.yml
+    ```
 
-ansible-playbook delete-openstack-on-openstack.yml --tags service-instances
-ansible-playbook create-openstack-on-openstack.yml --tags service-instances
+```core``` needs to be included for anything that uses dynamic inventory (anything that runs in OSPd for example)
 
-To regenerate templates (eg after clouddata/icloud-puppet run)
-
-ansible-playbook create-openstack-on-openstack.yml --tags core,templates
-
-To recreate virtual ceph:
-
-ansible-playbook delete-openstack-on-openstack.yml --tags ceph-instances
-ansible-playbook create-openstack-on-openstack.yml --tags ceph-instances
-ansible-playbook ceph-setup.yml
-
-"core" needs to be included for anything that uses dynamic inventory (anything that runs in OSPd for example)
-
-"infrastructure" is limited to IaaS bits - creates projects/networks/instances etc - basically no software or templating
+```infrastructure``` is limited to IaaS bits - creates projects/networks/instances etc - basically no software or templating
 
 Possibilities are endless. The user is encouraged to look through tags defined in the roles.
 
 
 License
 -------
-    
+
     OS-Inception - automation for building openstack on openstack
     Copyright (C) 2017 Rarm Nagalingam at Red Hat, Inc
 
@@ -295,6 +355,5 @@ Author Information
 GitHub IDs and e-mails
 - Rarm Nagalingam: snowjet
 - Jacob Anders:  jacobanders
-- Max D Bott:    mdbott
+- Max D Bott:    mdbott  (mbott@redhat.com)
 - John Apple II: 9strands ( jappleii -{at}- redhat -{dot}- com or john -{at}- theapplefamily -{dot}- info )
-

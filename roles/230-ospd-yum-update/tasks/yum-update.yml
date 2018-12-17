@@ -1,0 +1,13 @@
+---
+- name: Install updates
+  yum:
+    name: '*'
+    state: latest
+  async: "{{ yum_timeout }}"
+  poll: "{{ yum_poll }}"
+  when: ospd_install_updates
+  become: true
+  tags:
+    - yum-update
+    - undercloud
+    - rebuild

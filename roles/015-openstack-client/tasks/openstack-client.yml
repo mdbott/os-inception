@@ -1,0 +1,11 @@
+- name: Ensure openstack client configuration directory is present
+  file:
+    name: ~/.config/openstack
+    state: directory
+  become: false
+
+- name:  Ensure openstack client configuration is present
+  template:
+    src: clouds.yml.j2
+    dest: ~/.config/openstack/clouds.yaml
+  become: false

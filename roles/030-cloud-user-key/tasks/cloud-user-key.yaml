@@ -1,0 +1,62 @@
+---
+
+- name: get the username running the deploy
+  local_action: command id -gn
+  register: ansible_user_group
+  tags:
+    - cloud-user-keys
+
+- debug: var=ansible_user_group.stdout
+  tags:
+    - cloud-user-keys
+
+
+- name: Install private key
+  copy:
+    content: "{{ key_content }}"
+    dest: "~/.ssh/id_rsa.osdev{{ os_project }}"
+    mode: 0600
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_user_group.stdout }}"
+  tags:
+    - cloud-user-keys
+
+- name: Generate public key from private key
+  shell: "/usr/bin/ssh-keygen -y -f ~/.ssh/id_rsa.osdev{{ os_project }} > ~/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  args:
+    creates: "~/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  tags:
+    - cloud-user-keys
+
+- name: "Create {{ key_name }} keypair"
+  os_keypair:
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_ssh_pass }}"
+      project_name: "{{ os_project }}"
+    name: "{{ key_name }}"
+    state: present
+    public_key_file: "/home/{{ ansible_ssh_user }}/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  tags:
+    - cloud-user-keys
+
+- name: Check if the .ssh/config file exists
+  stat: path="~/.ssh/config"
+  register: p
+  tags:
+    - cloud-user-keys
+
+- name: Create  ssh config file if it doesn't exist
+  command: touch ~/.ssh/config
+  args:
+    creates: ~/.ssh/config
+  tags:
+    - cloud-user-keys
+
+- name: fix permissions on ssh config file
+  file:
+    path: "~/.ssh/config"
+    mode: 0600
+  tags:
+    - cloud-user-keys

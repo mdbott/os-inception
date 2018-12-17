@@ -1,0 +1,3 @@
+---
+# tasks file for 230-r10k-config
+- include: r10k-config.yaml

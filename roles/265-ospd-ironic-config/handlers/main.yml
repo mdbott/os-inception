@@ -1,0 +1,12 @@
+---
+# handlers file for 080-rhn-register
+- name: restart_ironic
+  service:
+    name: "{{ item }}"
+    state: restarted
+  become: true
+  with_items:
+    - openstack-ironic-api
+    - openstack-ironic-conductor
+    - openstack-ironic-inspector
+    - openstack-ironic-inspector-dnsmasq

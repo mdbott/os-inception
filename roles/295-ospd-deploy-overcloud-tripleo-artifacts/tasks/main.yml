@@ -1,0 +1,3 @@
+---
+# tasks file for 285-deploy-overcloud-puppet-modules
+- include: create-tripleo-artifact.yml

@@ -1,0 +1,94 @@
+---
+
+- name: Create the ironic node preparation script
+  template:
+    src: "templates/prepare-ironic-nodes.sh.j2"
+    dest: /home/{{ stack_user }}/prepare-ironic-nodes.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
+
+- name: Create the osp10 deploy script
+  template:
+    src: "templates/deploy.sh.j2"
+    dest: /home/{{ stack_user }}/deploy.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
+
+- name: Create the osp10 keystone update script
+  template:
+    src: "templates/keystone-update.sh.j2"
+    dest: /home/{{ stack_user }}/keystone-update.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
+
+
+- name: Create the osp10 overcloud update script
+  template:
+    src: "templates/osp10-overcloud-update.sh.j2"
+    dest: /home/{{ stack_user }}/osp10-overcloud-update.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
+
+
+- name: Create the fast forward upgrade script
+  template:
+    src: "templates/ffwd-to-osp13.sh.j2"
+    dest: /home/{{ stack_user }}/ffwd-to-osp13.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
+
+# - name: Create the osp11 upgrade deploy script
+#   template:
+#     src: "templates/deploy-upgrade-osp11.sh.j2"
+#     dest: /home/{{ stack_user }}/deploy-upgrade-osp11.sh
+#     owner: "{{ stack_user }}"
+#     group: "{{ stack_user }}"
+#     mode: 0755
+#   become: true
+#   tags:
+#     - deploy-script
+#     - templates
+#     - rebuild
+#
+# - name: Create the osp11 converge deploy script
+#   template:
+#     src: "templates/deploy-converge-osp11.sh.j2"
+#     dest: /home/{{ stack_user }}/deploy-converge-osp11.sh
+#     owner: "{{ stack_user }}"
+#     group: "{{ stack_user }}"
+#     mode: 0755
+#   become: true
+#   tags:
+#     - deploy-script
+#     - templates
+#     - rebuild

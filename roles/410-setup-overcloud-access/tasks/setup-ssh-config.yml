@@ -1,0 +1,36 @@
+---
+
+- name: set the correct permissions for the private key
+  file:
+    path: "/home/{{ bastion_user }}/.ssh/heat-admin.priv"
+    owner: "{{ bastion_user }}"
+    group: "{{ bastion_user_group }}"
+    mode: 0600
+
+- name: Ensure ssh configuration is present
+  blockinfile:
+    dest: ~/.ssh/config
+    create: yes
+    insertbefore: BOF
+    marker: "# {mark} overcloud access "
+    content: |
+      Host {{ os_project.split("-")[0] }}-pacemaker*
+             User heat-admin
+             StrictHostKeyChecking no
+             UserKnownHostsFile=/dev/null
+             IdentityFile ~/.ssh/heat-admin.priv
+      Host {{ os_project.split("-")[0] }}-service*
+             User heat-admin
+             StrictHostKeyChecking no
+             UserKnownHostsFile=/dev/null
+             IdentityFile ~/.ssh/heat-admin.priv
+      Host {{ os_project.split("-")[0] }}-compute*
+             User heat-admin
+             StrictHostKeyChecking no
+             UserKnownHostsFile=/dev/null
+             IdentityFile ~/.ssh/heat-admin.priv
+      Host {{ os_project.split("-")[0] }}-ospd*
+             User stack
+             StrictHostKeyChecking no
+             UserKnownHostsFile=/dev/null
+  become: false

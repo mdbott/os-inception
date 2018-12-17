@@ -1,0 +1,7 @@
+export SUBNODES_SSH_KEY="~/.ssh/id_rsa.osdev{{ os_project }}"
+export ComputeDeployedServer_hosts="{% for key, value in last_octet.compute.iteritems() %}{{ networks.provisioning.cidr[:-4] }}{{ value }}{% if not loop.last %} {% endif %}{% endfor %}"
+export ControllerDeployedServer_hosts="{% for key, value in last_octet.pacemaker.iteritems() %}{{ networks.provisioning.cidr[:-4] }}{{ value }}{% if not loop.last %} {% endif %}{% endfor %}"
+export OVERCLOUD_ROLES="ControllerDeployedServer ComputeDeployedServer"
+
+#Finally, run the script to configure the heat agent on all of the overcloud nodes
+#/usr/share/openstack-tripleo-heat-templates/deployed-server/scripts/get-occ-config.sh

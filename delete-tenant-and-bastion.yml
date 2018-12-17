@@ -1,0 +1,30 @@
+- name: OpenStack infrastructure
+  hosts:
+    - localhost
+  vars:
+    state: absent
+    ansible_python_interpreter: "~/.virtualenvs/{{ virtualenv_name }}/bin/python"
+  tasks:
+  roles:
+    - role: 100-bastion-inventory-update
+      new_state: "{{ state }}"
+    - role: 095-bastion-floatingip
+      new_state: "{{ state }}"
+    - role: 090-bastion-instance
+      new_state: "{{ state }}"
+    - role: 065-nova-flavors
+      new_state: "{{ state }}"
+    - role: 080-glance-images
+      new_state: "{{ state }}"
+    - role: 055-neutron-ports
+      new_state: "{{ state }}"
+    - role: 050-neutron-router
+      new_state: "{{ state }}"
+    - role: 045-neutron-subnets
+      new_state: "{{ state }}"
+    - role: 040-neutron-networks
+      new_state: "{{ state }}"
+    - role: 035-openstack-quota
+      new_state: "{{ state }}"
+    - role: 020-keystone-project
+      new_state: "{{ state }}"

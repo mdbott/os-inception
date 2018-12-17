@@ -1,0 +1,14 @@
+---
+
+
+- name: Create the osp10 deploy script
+  template:
+    src: "templates/overcloud-heat-configuration.sh.j2"
+    dest: /home/{{ stack_user }}/overcloud-heat-configuration.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - overcloud-heat-configuration
+    - preprovisioned-nodes

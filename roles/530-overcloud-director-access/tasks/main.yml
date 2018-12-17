@@ -1,0 +1,3 @@
+---
+# tasks file for 080-rhn-register
+- include: director-access.yml

@@ -1,0 +1,50 @@
+
+
+
+- name: Ensure compute instances for project {{ prefix }} are {{ new_state }} in the inventory
+  add_host:
+    hostname: "{{ item.key }}"
+    ansible_ssh_host: "{{ networks.external.cidr_prefix }}.{{ item.value }}"
+    ansible_ssh_user: cloud-user
+    ansible_become: true
+    become_user: root
+    become_method: sudo
+    groups:
+      - compute
+      - overcloud
+  with_dict: "{{ last_octet.compute }}"
+  tags:
+    - overcloud-inventory
+    - preprovisioned-nodes
+
+- name: Ensure pacemaker instances for project {{ prefix }} are {{ new_state }} in the inventory
+  add_host:
+    hostname: "{{ item.key }}"
+    ansible_ssh_host: "{{ networks.external.cidr_prefix }}.{{ item.value }}"
+    ansible_ssh_user: cloud-user
+    ansible_become: true
+    become_user: root
+    become_method: sudo
+    groups:
+      - pacemaker
+      - overcloud
+  with_dict: "{{ last_octet.pacemaker }}"
+  tags:
+    - overcloud-inventory
+    - preprovisioned-nodes
+
+- name: Ensure pacemaker instances for project {{ prefix }} are {{ new_state }} in the inventory
+  add_host:
+    hostname: "{{ item.key }}"
+    ansible_ssh_host: "{{ networks.external.cidr_prefix }}.{{ item.value }}"
+    ansible_ssh_user: cloud-user
+    ansible_become: true
+    become_user: root
+    become_method: sudo
+    groups:
+      - service
+      - overcloud
+  with_dict: "{{ last_octet.service }}"
+  tags:
+    - overcloud-inventory
+    - preprovisioned-nodes

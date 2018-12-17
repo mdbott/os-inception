@@ -1,6 +1,0 @@
----
-- include: neutron-ports.yml
-  with_items:
-    - "{{ node_types }}"
-  loop_control:
-    loop_var: node_type

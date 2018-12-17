@@ -1,0 +1,100 @@
+---
+
+- name: Ensure the {{ stack_user }} user is {{ new_state }}
+  user:
+    name: "{{ stack_user }}"
+    state: "{{ new_state}}"
+    force: yes
+    groups:
+      - wheel
+  become: true
+  tags:
+    - stack-user
+
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: "{{ new_state }}"
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+  become: true
+  tags:
+    - stack-user
+
+
+- name: create /home/stack directory
+  file:
+    dest: "/home/stack"
+    state: directory
+    owner: stack
+    group: stack
+    mode: 0755
+  become: true
+  when: new_state == "present"
+  tags:
+    - stack-user
+
+- name: create /home/stack/.ssh directory
+  file:
+    dest: "/home/stack/.ssh"
+    state: directory
+    owner: stack
+    group: stack
+  become: true
+  when: new_state == "present"
+  tags:
+    - stack-user
+
+
+- name: Install private key
+  copy:
+    content: "{{ key_content }}"
+    dest: "/home/stack/.ssh/id_rsa.osdev{{ os_project }}"
+    mode: 0600
+    owner: stack
+    group: stack
+  become: true
+  when: new_state == "present"
+  tags:
+    - stack-user
+
+
+- name: Generate public key from private key
+  shell: "/usr/bin/ssh-keygen -y -f /home/stack/.ssh/id_rsa.osdev{{ os_project }} > /home/stack/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  args:
+    creates: "/home/stack/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  become: true
+  when: new_state == "present"
+  tags:
+    - stack-user
+
+- name: fix permissions on ssh public key file
+  file:
+    path: "/home/stack/.ssh/id_rsa.osdev{{ os_project }}.pub"
+    owner: stack
+    group: stack
+  become: true
+  when: new_state == "present"
+  tags:
+    - stack-user
+
+
+- name: Fetch public key
+  shell: "cat /home/stack/.ssh/id_rsa.osdev{{ os_project }}.pub"
+  register: public_key
+  become: true
+  when: new_state == "present"
+  tags:
+    - stack-user
+
+
+- name: Add {{ key_name }} public key to authorized_keys for stack
+  authorized_key:
+    user: "{{ stack_user }}"
+    state: present
+    key: "{{ public_key.stdout }}"
+  become: true
+  when: new_state=="present"
+  tags:
+    - stack-user

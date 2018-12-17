@@ -1,0 +1,25 @@
+---
+- name: Make sure makejson.sh is present
+  template:
+    src: makejson.sh.j2
+    dest: /usr/local/bin/makejson.sh
+    owner: root
+    group: root
+    mode: 0755
+  become: yes
+  when: new_state=="present"
+  tags:
+    - instack-json
+    - templates
+    - rebuild
+
+- name: Generate instack.json
+  shell: "/usr/local/bin/makejson.sh"
+  #environment: "{{ hostvars['localhost']['openstack_user_auth_env'] }}"
+  become: yes
+  become_user: stack
+  when: new_state=="present"
+  tags:
+    - instack-json
+    - templates
+    - rebuild

@@ -1,0 +1,53 @@
+---
+
+
+- name: Create ifcfg- files with DHCP config for the cloud access interface
+  template:
+    src: "ifcfg-eth4.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth4
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  become: true
+  tags:
+    - bastion-ports
+    - bastion
+    - rebuild
+  when: new_state == "present" and use_existing_external_network == "false"
+
+
+- name: Bring up eth4
+  shell: "ifup eth4"
+  become: true
+  ignore_errors: True
+  tags:
+    - bastion-ports
+    - bastion
+    - rebuild
+  when: new_state == "present" and use_existing_external_network == "false"
+
+- name: Bring down eth4
+  shell: "ifdown eth4"
+  become: true
+  tags:
+    - bastion-ports
+    - bastion
+    - rebuild
+  when: new_state == "absent"  and use_existing_external_network == "false"
+  ignore_errors: true
+
+- name: Delete ifcfg files
+  file:
+    path: "{{ item }}"
+    state: "{{ new_state }}"
+  become: yes
+  with_items:
+    - /etc/sysconfig/network-scripts/ifcfg-eth4
+  tags:
+    - bastion-ports
+    - bastion
+    - rebuild
+  when: new_state == "absent"

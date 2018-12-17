@@ -1,0 +1,24 @@
+- name: Ensure undercloud baremetal flavor is absent
+  shell: "openstack --os-cloud undercloud flavor delete baremetal"
+  become: yes
+  become_user: stack
+  tags:
+    - undercloud-flavor
+    - rebuild
+
+- name: Create undercloud baremetal flavor with 8GB boot drive for os-inception
+  shell: "openstack --os-cloud undercloud flavor create baremetal --id auto --disk 8 --ram 4096 --vcpus 1"
+  become: yes
+  become_user: stack
+  tags:
+    - undercloud-flavor
+    - rebuild
+
+- name: Ensure undercloud baremetal flavor has the metadata required by tripleo
+  shell: "nova flavor-key baremetal set capabilities:boot_option=local"
+  become: yes
+  become_user: stack
+  environment: "{{ undercloud_auth_env_v2 }}"
+  tags:
+    - undercloud-flavor
+    - rebuild

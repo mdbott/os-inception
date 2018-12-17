@@ -1,0 +1,100 @@
+---
+
+- name: Check if ifcfg-eth1 exists.
+  stat:
+    path: /etc/sysconfig/network-scripts/ifcfg-eth1
+  register: stat_result
+  tags:
+    - ospd-ports
+
+
+- name: Read in the existing ifcfg-eth1 config
+  slurp:
+    path: /etc/sysconfig/network-scripts/ifcfg-eth1
+  register: encoded_eth1_config
+  when: stat_result.stat.exists
+  tags:
+    - ospd-ports
+
+
+- name: add file contents to a var
+  set_fact:
+    eth1_config: "{{ encoded_eth1_config.content | b64decode }}"
+  tags:
+    - ospd-ports
+  when: stat_result.stat.exists
+
+
+- name: add dummy value to a var
+  set_fact:
+    eth1_config: "Not deployed"
+  tags:
+    - ospd-ports
+  when: not stat_result.stat.exists
+
+- debug:
+    var: eth1_config
+  tags:
+    - ospd-ports
+
+
+- name: Create ifcfg- files with DHCP config for the provisioning interface
+  template:
+    src: "ifcfg-eth1.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth1
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  become: true
+  tags:
+    - ospd-ports
+  when: new_state == "present" and "OVSPort" not in eth1_config
+
+
+- name: Create ifcfg- files with DHCP config for the storage interface
+  template:
+    src: "ifcfg-eth2.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth2
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  become: true
+  tags:
+    - ospd-ports
+  when: new_state == "present" and use_existing_external_network == "false"
+
+
+- name: Bring up eth1
+  shell: "ifup eth1"
+  become: true
+  ignore_errors: True
+  tags:
+    - ospd-ports
+  when: new_state == "present"
+
+
+- name: Bring down eth1
+  shell: "ifdown eth1"
+  become: true
+  tags:
+    - ospd-ports
+  when: new_state == "absent"
+  ignore_errors: true
+
+
+- name: Delete ifcfg files
+  file:
+    path: "{{ item }}"
+    state: "{{ new_state }}"
+  become: yes
+  with_items:
+    - /etc/sysconfig/network-scripts/ifcfg-eth1
+  tags:
+    - ospd-ports
+  when: new_state == "absent"

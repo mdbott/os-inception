@@ -1,0 +1,37 @@
+---
+
+
+- name: Create ifcfg- files for the provisioning interface
+  template:
+    src: "ifcfg-eth1.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth1
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  become: true
+  tags:
+    - compute-ifcfg
+    - preprovisioned-nodes
+
+- name: Create ifcfg- files with DHCP config for additional interfaces
+  template:
+    src: "ifcfg-dhcp.j2"
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{item}}
+    owner:  root
+    group:  root
+    mode:   0644
+    seuser: system_u
+    serole: object_r
+    setype: net_conf_t
+  with_items:
+    - eth2
+    - eth3
+    - eth4
+  tags:
+    - compute-ifcfg
+    - preprovisioned-nodes
+  become: true
+  notify: restart_network

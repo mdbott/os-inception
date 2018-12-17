@@ -1,0 +1,44 @@
+---
+- name: Ensure custom nova flavors for project {{ os_project }} are {{ new_state }}
+  os_nova_flavor:
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ admin_user }}"
+      password: "{{ admin_user_password }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    state: "{{ new_state }}"
+    is_public: False
+    name: "{{ item.value.name }}"
+    ram: "{{ item.value.ram}}"
+    vcpus: "{{ item.value.vcpus }}"
+    disk: "{{ item.value.disk }}"
+    ephemeral: "{{ item.value.ephemeral }}"
+    extra_specs: "{{ item.value.extra_specs }}"
+  with_dict: "{{ flavors }}"
+  when: configure_flavors==true and isolate_nested_computes==false
+  tags:
+    - flavors
+    - infrastructure
+
+- name: Ensure custom nova flavors for project {{ os_project }} are {{ new_state }}
+  os_nova_flavor:
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ admin_user }}"
+      password: "{{ admin_user_password }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    state: "{{ new_state }}"
+    is_public: False
+    name: "{{ item.value.name }}"
+    ram: "{{ item.value.ram}}"
+    vcpus: "{{ item.value.vcpus }}"
+    disk: "{{ item.value.disk }}"
+    ephemeral: "{{ item.value.ephemeral }}"
+    extra_specs: "{{ item.value.extra_specs }}"
+  with_dict: "{{ flavors_nested }}"
+  when: configure_flavors==true and isolate_nested_computes==true
+  tags:
+    - flavors
+    - infrastructure

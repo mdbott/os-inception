@@ -1,0 +1,5 @@
+---
+- include: import-baremetal-nodes-10.yml
+  when: osp_version==10
+- include: import-baremetal-nodes-13.yml
+  when: osp_version==13

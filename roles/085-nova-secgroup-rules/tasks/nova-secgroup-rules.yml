@@ -1,0 +1,67 @@
+---
+
+- os_project_facts:
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ admin_user }}"
+      password: "{{ admin_user_password }}"
+      project_name: "{{ os_project }}"
+    name: "{{ os_project }}"
+  tags:
+    - secgroups
+
+- debug:
+    var: openstack_projects
+  tags:
+    - secgroups
+
+- name: Fetch default secgroup UUID
+  shell: "openstack --os-cloud {{ os_cluster_admincreds }} security group list --project {{ os_project }}| awk '/default/ {print $2}'"
+  # environment:
+  #   OS_PROJECT_NAME: "{{ os_project }}"
+  #   OS_AUTH_URL: https://iron.cbr.lab:13000/v2.0
+  #   OS_USERNAME: "{{ admin_user }}"
+  #   OS_PASSWORD: "{{ admin_user_password }}"
+  #   OS_CACERT: "{{ cacertfile }}"
+  register: default_secgroup_uuid
+  ignore_errors: true
+  when: new_state=="present"
+  tags:
+    - secgroups
+    - infrastructure
+
+- name: Ensure allow ssh rule in {{ os_inception_secgroup }} for {{ os_project }} is {{ new_state }}
+  os_security_group_rule:
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ admin_user }}"
+      password: "{{ admin_user_password }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    state: "{{ new_state }}"
+    security_group: "{{ default_secgroup_uuid.stdout }}"
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: 0.0.0.0/0
+  tags:
+    - secgroups
+    - infrastructure
+
+- name: Ensure allow icmp rule in {{ os_inception_secgroup }} for {{ os_project }} is {{ new_state }}
+  os_security_group_rule:
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ admin_user }}"
+      password: "{{ admin_user_password }}"
+      project_name: "{{ os_project }}"
+    cacert: "{{ cacertfile }}"
+    state: "{{ new_state }}"
+    security_group: "{{ default_secgroup_uuid.stdout }}"
+    protocol: icmp
+    port_range_min: -1
+    port_range_max: -1
+    remote_ip_prefix: 0.0.0.0/0
+  tags:
+    - secgroups
+    - infrastructure

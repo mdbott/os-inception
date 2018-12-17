@@ -1,8 +1,0 @@
-- name: Ensure yum prerequisites are {{ new_state }}
-  yum:
-    name: "{{ item }}"
-    state: "{{ new_state }}"
-  with_items: "{{ yum_prerequisites }}"
-  tags:
-    - yum-prereqs
-  become: true

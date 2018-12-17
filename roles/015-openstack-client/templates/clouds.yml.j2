@@ -1,0 +1,14 @@
+clouds:
+  {{ os_cluster_admincreds }}:
+    auth:
+      auth_url: {{ os_cluster_keystone_adminurl }}
+      username: {{ admin_user }}
+      password: {{ admin_user_password }}
+      project_name: {{ admin_project }}
+{% if identity_api_version == 3 %}
+      user_domain_name: {{ admin_domain_name }}
+      project_domain_name: {{ admin_domain_name }}
+    identity_api_version: {{ identity_api_version }}
+    compute_api_version: {{ compute_api_version }}
+{% endif %}
+    cacert: {{ cacertfile }}

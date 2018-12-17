@@ -1,0 +1,34 @@
+---
+
+##################################################
+#                                                #
+# Deploy the ceph, ospd & overcloud instances    #
+#                                                #
+##################################################
+
+- name: OpenStack infrastructure
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 007-set-running-user
+    - role: 210-ospd-inventory-update
+      new_state: "{{ state }}"
+
+##################################################
+#                                                #
+# Deploy the overcloud                           #
+#                                                #
+##################################################
+
+- name: OpenStack undercloud
+  hosts:
+    - ospd
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 350-ospd-overcloud-prep
+    - role: 355-ospd-overcloud-deploy

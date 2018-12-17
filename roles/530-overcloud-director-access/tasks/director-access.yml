@@ -1,0 +1,21 @@
+---
+
+
+- name: copy the undercloud access key onto the overcloud host
+  copy:
+    src: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+    dest: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  tags:
+    - overcloud-director-access
+    - preprovisioned-nodes
+
+- name: Run update-ca-trust on the overcloud nodes
+  shell: "sudo update-ca-trust extract"
+  become: yes
+  tags:
+    - overcloud-director-access
+    - preprovisioned-nodes

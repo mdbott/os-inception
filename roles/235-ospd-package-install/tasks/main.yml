@@ -1,0 +1,5 @@
+---
+# tasks file for 080-rhn-register
+- include: yum-packages.yml
+- include: osp13-extra-packages.yml
+  when: osp_version==13

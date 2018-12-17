@@ -1,0 +1,85 @@
+- name: OpenStack infrastructure
+  hosts:
+    - localhost
+  vars:
+    state: present
+    ansible_python_interpreter: "~/.virtualenvs/{{ virtualenv_name }}/bin/python"
+  tasks:
+  roles:
+    - role: 001-baremetal-cloud-cacert-import
+      new_state: "{{ state }}"
+      access_user: "{{ bastion_user }}"
+      access_user_group: "{{ bastion_user_group }}"
+    - role: 007-set-running-user
+      when: use_running_user|bool == true
+    - role: 010-merge-os-creds
+    - role: 015-openstack-client
+      new_state: "{{ state }}"
+    - role: 020-keystone-project
+      new_state: "{{ state }}"
+    - role: 025-keystone-role
+      new_state: "{{ state }}"
+    - role: 027-nested-virt-host-aggregate
+      new_state: "{{ state }}"
+      when: isolate_nested_computes==true
+    - role: 030-cloud-user-key
+      new_state: "{{ state }}"
+    - role: 035-openstack-quota
+      new_state: "{{ state }}"
+    - role: 040-neutron-networks
+      new_state: "{{ state }}"
+    - role: 045-neutron-subnets
+      new_state: "{{ state }}"
+    - role: 050-neutron-router
+      new_state: "{{ state }}"
+    - role: 055-neutron-ports
+      new_state: "{{ state }}"
+    - role: 060-disable-portsec
+    - role: 065-nova-flavors
+      new_state: "{{ state }}"
+    - role: 070-nova-flavors-access
+    - role: 075-temp-files
+    - role: 080-glance-images
+      new_state: "{{ state }}"
+    - role: 085-nova-secgroup-rules
+      new_state: "{{ state }}"
+    - role: 090-bastion-instance
+      new_state: "{{ state }}"
+    - role: 095-bastion-floatingip
+      new_state: "{{ state }}"
+    - role: 100-bastion-inventory-update
+      new_state: "{{ state }}"
+
+- name: Ansible setup
+  hosts:
+    - bastion
+  vars:
+    state: present
+  tags:
+    - bastion-instance
+  tasks:
+  roles:
+    - role: 105-bastion-networking
+      new_state: "{{ state }}"
+    - role: 110-bastion-yum-prerequisites
+      new_state: "{{ state }}"
+    - role: 115-bastion-pip-prerequisites
+      new_state: "forcereinstall"
+    - role: 120-bastion-gem-prerequisites
+      new_state: "{{ state }}"
+    - role: 125-bastion-openstack-client
+    - role: 010-merge-os-creds
+    - role: 130-bastion-cloud-user-key
+    - role: 135-bastion-git-clone
+    - role: 140-bastion-puppetforge-gem
+      new_state: "{{ state }}"
+    - role: 145-bastion-r10k-gem
+      new_state: "{{ state }}"
+    - role: 150-bastion-r10k-config
+      new_state: "{{ state }}"
+    - role: 155-bastion-r10k-run
+    - role: 160-bastion-load-clouddata
+    - role: 165-dev-cloud-cacert-import
+      bastion_host: "{{ os_project }}-bastion"
+    - role: 315-ceph-ansible
+      new_state: "{{ state }}"

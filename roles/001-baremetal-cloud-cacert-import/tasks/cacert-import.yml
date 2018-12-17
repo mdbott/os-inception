@@ -1,0 +1,22 @@
+---
+- name: Import CA cert
+  copy:
+    dest: "{{ cacertfile }}"
+    content: "{{ cacert }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: new_state == "present"
+  become: true
+  become_user: root
+  tags:
+    - cacert-import
+    - rebuild
+
+- name: Update CA trust
+  shell: "update-ca-trust"
+  become: true
+  become_user: root
+  tags:
+    - cacert-import
+    - rebuild

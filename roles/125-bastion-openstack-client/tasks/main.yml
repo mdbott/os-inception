@@ -1,0 +1,3 @@
+---
+# tasks file for 125-openstack-client
+- include: openstack-client.yml

@@ -1,0 +1,10 @@
+---
+
+
+- name: fetch the undercloud access key onto the bastion host
+  fetch:
+    src: /home/stack/.ssh/id_rsa
+    dest: "/home/{{ bastion_user }}/.ssh/heat-admin.priv"
+    flat: yes
+  become: yes
+  become_user: stack

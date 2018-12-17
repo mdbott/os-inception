@@ -1,0 +1,13 @@
+---
+# tasks file for os-on-os
+- include: instance-check.yml
+- include: ospd-instance.yml
+  node_type: ospd
+- include: pacemaker-instances.yml
+  node_type: pacemaker
+- include: service-instances.yml
+  node_type: service
+- include: ceph-instances.yml
+  node_type: ceph
+- include: compute-instances.yml
+  node_type: compute

@@ -1,0 +1,63 @@
+---
+
+
+- name: Import the ironic nodes into the undercloud
+  shell: "openstack --os-cloud undercloud_v3 overcloud node import ~/instack.json"
+  become: yes
+  become_user: stack
+  tags:
+    - overcloud-prep
+
+- name: Configure the boot state for the baremetal nodes
+  shell: "openstack --os-cloud undercloud_v3 baremetal node provide {{ item }}"
+  become: yes
+  become_user: stack
+  with_items:
+    - compute-1
+    - compute-2
+    - pacemaker-1
+    - pacemaker-2
+    - pacemaker-3
+    - service-1
+    - service-2
+    - service-3
+  tags:
+    - overcloud-prep
+
+
+- name: Power down the baremetal nodes
+  shell: "openstack --os-cloud undercloud_v3 baremetal node power off {{ item }}"
+  become: yes
+  become_user: stack
+  with_items:
+    - compute-1
+    - compute-2
+    - pacemaker-1
+    - pacemaker-2
+    - pacemaker-3
+    - service-1
+    - service-2
+    - service-3
+  tags:
+    - overcloud-prep
+
+# - name: Assign the controller profile to the pacemaker nodes
+#   shell: "openstack --os-cloud undercloud_v3 baremetal node set --property capabilities='profile:control,boot_option:local' {{ item }}"
+#   become: yes
+#   become_user: stack
+#   with_items:
+#     - pacemaker-1
+#     - pacemaker-2
+#     - pacemaker-3
+#   tags:
+#     - overcloud-prep
+#
+# - name: Assign the controller profile to the pacemaker nodes
+#   shell: "openstack --os-cloud undercloud_v3 baremetal node set --property capabilities='profile:compute,boot_option:local' {{ item }}"
+#   become: yes
+#   become_user: stack
+#   with_items:
+#     - compute-1
+#     - compute-2
+#   tags:
+#     - overcloud-prep

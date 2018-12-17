@@ -1,0 +1,13 @@
+- name: Ensure yum repositories are {{new_state}}
+  yum_repository:
+    name: mirror-{{ item }}
+    description: mirror-{{ item }}
+    baseurl: "{{reposerver_url}}/{{item}}"
+    state: "{{ new_state}}"
+    gpgcheck: "{{ yum_gpgcheck }}"
+    gpgkey: "{{ yum_gpgcheck_key }}"
+  with_items:
+    - "{{ yum_repos| select('match', '^((?!openstack).)*$') | list  }}"
+  tags:
+    - yum-repos
+  become: true

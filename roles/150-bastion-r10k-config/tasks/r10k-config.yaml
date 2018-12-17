@@ -1,0 +1,49 @@
+- name: deploy r10k config directory
+  file:
+    path: "{{ item }}"
+    recurse: yes
+    force: yes
+    state: directory
+    owner: "{{ bastion_user }}"
+    group: root
+    mode: 0775
+  become: yes
+  with_items:
+    - /etc/puppetlabs/r10k
+    - /etc/puppet/cloud_environments
+    - /var/cache/r10k
+  when: new_state=="present"
+  tags:
+    - r10k-config
+    - r10k
+    - templates
+
+- name: delete r10k config directory
+  file:
+    path: "{{ item }}"
+    force: yes
+    state: absent
+    owner: "{{ bastion_user }}"
+    group: root
+    mode: 0775
+  become: yes
+  with_items:
+    - /etc/puppetlabs/r10k
+    - /etc/puppet/cloud_environments
+    - /var/cache/r10k
+  when: new_state=="absent"
+  tags:
+    - r10k-config
+    - r10k
+    - templates
+
+- name: deploy r10k config file
+  template:
+    src: r10k.yaml.j2
+    dest: /etc/puppetlabs/r10k/r10k.yaml
+  when: new_state=="present"
+  become: yes
+  tags:
+    - r10k-config
+    - r10k
+    - templates

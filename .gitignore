@@ -1,0 +1,5 @@
+*.qcow2
+ansiblerc
+*.swp
+scripts/out/*
+*.retry

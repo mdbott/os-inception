@@ -1,3 +1,16 @@
+- name: Confirm deletion of openstack environment.
+  hosts:
+    - localhost
+  tasks:
+    - name: Wait for the user to confirm the deletion.
+      pause:
+        prompt: "WARNING!!!! This playbook will delete the dev-cloud environment including all of the cloud snapshots! Are you sure you want to continue? (enter yes to continue or Ctrl+c a to abort)"
+      register: my_pause
+      delegate_to: localhost
+    - name: Abort play if the user has not entered yes.
+      fail: msg="Aborting the deletion"
+      when: not (hostvars['localhost'].my_pause.user_input | bool)
+
 - name: Prepare inventory and variables
   hosts:
     - localhost
@@ -5,7 +18,7 @@
     state: present
   tasks:
   roles:
-    - role: 070-update-inventory
+    - role: 210-ospd-inventory-update
       new_state: "{{ state }}"
 
 - name: OpenStack undercloud
@@ -15,15 +28,15 @@
     state: absent
   tasks:
   roles:
-    - role: 185-cacert-import
+    - role: 001-baremetal-cloud-cacert-import
       new_state: "{{ state }}"
-    - role: 110-stack-user
+      access_user: "{{ ospd_user }}"
+      access_user_group: "{{ ospd_user_group }}"
+    - role: 240-ospd-stack-user
       new_state: "{{ state }}"
-    - role: 100-yum-install
+    - role: 235-ospd-package-install
       new_state: "{{ state }}"
-#    - role: 080-subscription-manager
-#      new_state: "{{ state }}"
-    - role: 079-yum-repos
+    - role: 220-ospd-yum-repos
       new_state: "{{ state }}"
 
 - name: OpenStack infrastructure
@@ -33,34 +46,11 @@
     state: absent
   tasks:
   roles:
-    - role: 195-bastion-networking
+    - role: 001-baremetal-cloud-cacert-import
       new_state: "{{ state }}"
-    - role: 190-bastion-ports
+      access_user: "{{ bastion_user }}"
+      access_user_group: "{{ bastion_user_group }}"
+    - role: 205-ospd-floatingip
       new_state: "{{ state }}"
-    - role: 185-cacert-import
+    - role: 200-nova-instances
       new_state: "{{ state }}"
-    - role: 075-ospd-floatingip
-      new_state: "{{ state }}"
-    - role: 060-nova-instances
-      new_state: "{{ state }}"
-    - role: 059-server-groups
-      new_state: "{{ state }}"
-    - role: 050-nova-flavors
-      new_state: "{{ state }}"
-    - role: 055-glance-images
-      new_state: "{{ state }}"
-    - role: 040-neutron-ports
-      new_state: "{{ state }}"
-    - role: 035-neutron-subnets
-      new_state: "{{ state }}"
-    - role: 030-neutron-networks
-      new_state: "{{ state }}"
-    - role: 025-ospd-floatingip-create
-      new_state: "{{ state }}"
-    - role: 020-openstack-quota
-      new_state: "{{ state }}"
-    - role: 015-keystone-role
-      new_state: "{{ state }}"
-    - role: 010-keystone-project
-      new_state: "{{ state }}"
-

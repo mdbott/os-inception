@@ -1,0 +1,22 @@
+---
+
+- name: Gathering facts on instances
+  os_server_facts:
+    cloud: "{{ os_cluster }}"
+    cacert: "{{ cacertfile }}"
+    server: "{{ prefix }}-*"
+    detailed: true
+  tags:
+    - instance-facts
+    - instances
+    - ceph-instances
+    - compute-instances
+    - ospd-instances
+    - pacemaker-instances
+    - service-instances
+    - infrastructure
+
+- debug:
+    msg: '{{ openstack_servers | length }}'
+  tags:
+    - instance-facts

@@ -1,0 +1,3 @@
+---
+# tasks file for 220-r10k-gem---
+- include: r10k-gem.yaml
