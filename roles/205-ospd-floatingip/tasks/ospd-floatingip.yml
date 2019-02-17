@@ -40,6 +40,22 @@
     network: "{{ external_network }}"
     nat_destination: "{{ prefix }}_external"
     reuse: yes
+  when: new_state=="present"
+  tags:
+    - ospd-float-attach
+    - rebuild
+
+# Ported Max's changes to enable floating ips to be removed when cloud is deleted
+- name: Ensure that the floating ip for the ospd instance is "{{ new_state }}"
+  os_floating_ip:
+    cloud: "{{ os_cluster }}"
+    state: "{{ new_state }}"
+    purge: yes
+    server: "{{ prefix }}-ospd-1"
+    network: "{{ external_network }}"
+    nat_destination: "{{ prefix }}_external"
+    reuse: yes
+  when: new_state=="absent"
   tags:
     - ospd-float-attach
     - rebuild

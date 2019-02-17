@@ -1,0 +1,33 @@
+---
+- name: Ensure python-novajoin package is installed
+  yum:
+    name: python-novajoin
+    state: present
+  become: true
+  tags:
+    - novajoin
+    - undercloud-config
+    - undercloud
+    - rebuild
+
+- name: Retrieve IPA one-time-password for ospd enrolment
+  shell: >
+    /usr/libexec/novajoin-ipa-setup
+    --principal {{ clouddata.ipa.username }}
+    --password {{ clouddata.ipa.password }}
+    --server {{ clouddata.ipa.server }}
+    --realm {{ clouddata.ipa.realm }}
+    --domain {{ domain_name }}
+    --hostname {{ os_project }}-ospd-1.instance.{{ domain_name }}
+    --precreate
+  become: true
+  register: novajoin_ipa_otp
+  tags:
+    - novajoin
+    - undercloud-config
+    - undercloud
+    - rebuild
+
+- name: Retrieve IPA host IP address for undercloud.conf
+  set_fact:
+    novajoin_ipa_ipaddr: "{{ lookup('dig', clouddata.ipa.server) }}"

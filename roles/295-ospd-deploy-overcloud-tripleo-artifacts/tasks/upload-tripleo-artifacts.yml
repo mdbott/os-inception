@@ -1,0 +1,27 @@
+---
+- name: Deploy the artifacts into the undercloud
+  shell: "upload-swift-artifacts -f {{ artifacts_filenames | join(' -f ') }}"
+  become: yes
+  become_user: stack
+  args:
+    chdir: /home/stack
+    creates: /home/stack/.tripleo/environments/deployment-artifacts.yaml
+  environment: "{{ undercloud_auth_env_v2 }}"
+  when: osp_version==10 and artifacts_filenames
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Deploy the artifacts into the undercloud
+  shell: "upload-swift-artifacts -f {{ artifacts_filenames | join(' -f ') }}"
+  become: yes
+  become_user: stack
+  args:
+    chdir: /home/stack
+  environment: "{{ undercloud_auth_env_v3 }}"
+  when: osp_version==13 and artifacts_filenames
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild

@@ -1,0 +1,22 @@
+---
+- name: Get the clouddata from the bastion
+  slurp:
+    path: "/etc/puppet/cloud_environments/{{ r10k_environment }}/clouddata/clouddata/{{ icloud_puppet_branch }}.yaml"
+  register: encoded_clouddata
+  delegate_to: localhost
+  tags:
+    - ipa-clouddata
+    - novajoin
+    - undercloud-config
+    - undercloud
+    - rebuild
+
+- name: load clouddata for the {{ os_project }} cloud into a cloud variable.
+  set_fact:
+    clouddata: "{{ encoded_clouddata.content | b64decode | from_yaml }}"
+  tags:
+    - ipa-clouddata
+    - novajoin
+    - undercloud-config
+    - undercloud
+    - rebuild

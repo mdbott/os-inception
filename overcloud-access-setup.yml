@@ -7,6 +7,8 @@
   roles:
     - role: 210-ospd-inventory-update
       new_state: "{{ state }}"
+    - role: 100-bastion-inventory-update
+      new_state: "{{ state }}"
 
 - name: OpenStack undercloud
   hosts:

@@ -19,7 +19,7 @@
       - port-name: "{{ prefix }}_ospd_cloud_access"
     meta:
       group: pacemaker
-  when: use_existing_external_network == "false" and openstack_servers | length < 13 and new_state=="present"
+  when: use_existing_external_network == "false" and instances | select('match', 'ospd') | list | length < 1 and new_state=="present"
   with_sequence:
     count="{{ nodes[node_type].count }}"
   tags:
@@ -72,7 +72,7 @@
       - port-name: "{{ prefix }}_provisioning_{{ node_type }}_{{ item }}"
     meta:
       group: pacemaker
-  when: use_existing_external_network == "true" and openstack_servers | length < 13 and new_state=="present"
+  when: use_existing_external_network == "true" and (instance | select('match', '.*ospd.*') | list | length < 1) and new_state=="present"
   with_sequence:
     count="{{ nodes[node_type].count }}"
   tags:

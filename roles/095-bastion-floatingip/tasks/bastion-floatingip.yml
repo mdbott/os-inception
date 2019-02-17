@@ -1,6 +1,4 @@
 ---
-
-
 - name: Ensure that the floating ip for the bastion is "{{ new_state }}"
   os_floating_ip:
     state: "{{ new_state }}"
@@ -13,5 +11,24 @@
     network: "{{ external_network }}"
     nat_destination: "{{ prefix }}_external"
     reuse: yes
+  when: new_state=="present"
+  tags:
+    - bastion-instance
+
+# Ported Max's changes to enable floating ips to be removed when cloud is deleted
+- name: Ensure that the floating ip for the bastion is "{{ new_state }}"
+  os_floating_ip:
+    state: "{{ new_state }}"
+    purge: yes
+    auth:
+      auth_url: "{{ os_cluster_keystone_adminurl }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_ssh_pass }}"
+      project_name: "{{ os_project }}"
+    server: "{{ prefix}}-{{ node_type}}"
+    network: "{{ external_network }}"
+    nat_destination: "{{ prefix }}_external"
+    reuse: yes
+  when: new_state=="absent"
   tags:
     - bastion-instance

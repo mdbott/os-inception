@@ -14,8 +14,6 @@
     chdir: /home/stack/images/
   become: yes
   become_user: stack
-  ignore_errors: true
-  async: 120
   poll: 10
   tags:
     - overcloud-containers
@@ -32,8 +30,6 @@
     chdir: /home/stack/images/
   become: yes
   become_user: root
-  ignore_errors: true
-  async: 120
   poll: 10
   tags:
     - overcloud-containers

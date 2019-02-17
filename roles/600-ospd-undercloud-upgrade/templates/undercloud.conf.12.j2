@@ -1,0 +1,16 @@
+[DEFAULT]
+#image_path = .
+#undercloud_hostname = <None>
+local_ip = {{ undercloud.local_ip }}
+network_gateway = {{ undercloud.network_gateway }}
+local_interface = {{ undercloud.local_interface }}
+local_mtu = {{ undercloud.local_mtu }}
+network_cidr = {{ undercloud.network_cidr }}
+masquerade_network = {{ undercloud.masquerade_network }}
+inspection_iprange = {{ undercloud.inspection_start }},{{ undercloud.inspection_end }}
+dhcp_start = {{ undercloud.dhcp_start }}
+dhcp_end = {{ undercloud.dhcp_end }}
+enable_tempest = true
+
+[auth]
+undercloud_admin_password = {{ undercloud.undercloud_admin_password }}

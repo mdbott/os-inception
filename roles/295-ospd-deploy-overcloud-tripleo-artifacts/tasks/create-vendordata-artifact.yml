@@ -1,0 +1,54 @@
+---
+- name: Setup the vendordata package path
+  file:
+    path: /home/stack/vendordata-deploy/tmp/vendordata_installation_files
+    state: directory
+  become: true
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Ensure vendordata archive path ownership/permissions are correct
+  file:
+    path: /home/stack/vendordata-deploy/tmp
+    state: directory
+    owner: root
+    group: root
+    mode: 01777
+  become: true
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Fetch the vendordata project
+  git:
+    repo: "{{ git_repos.vendordata.url }}"
+    version: "{{ git_repos.vendordata.branch }}"
+    dest: /home/stack/vendordata-deploy/tmp/vendordata_installation_files/vendordata
+    key_file: /home/stack/.ssh/id_rsa.osdev{{ os_project }}
+    accept_hostkey: true
+  become: true
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Archive the vendordata package
+  archive:
+    path: /home/stack/vendordata-deploy/tmp
+    dest: /home/stack/vendordata.tgz
+  become: true
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Add vendordata package artifact to artifact list
+  set_fact:
+    artifacts_filenames: "{{ artifacts_filenames + ['/home/stack/vendordata.tgz'] }}"
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild

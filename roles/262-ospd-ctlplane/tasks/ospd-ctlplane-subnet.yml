@@ -1,0 +1,26 @@
+---
+- name: Get IPA server IP address
+  set_fact:
+    ipa_ipaddress: "{{ lookup('dig', clouddata.ipa.server) }}"
+
+- name: Get current nameservers for OSPD control plane subnet
+  shell: openstack subnet show ctlplane-subnet -c dns_nameservers -f value
+  become: yes
+  become_user: stack
+  environment: "{{ undercloud_auth_env_v3 }}"
+  register: ctlplane_subnets
+  tags:
+    - undercloud-ctlplane
+    - undercloud
+    - rebuild
+
+- name: Set nameservers for OSPD control plane subnet
+  shell: openstack subnet set --dns-nameserver {{ ipa_ipaddress }} ctlplane-subnet
+  become: yes
+  become_user: stack
+  environment: "{{ undercloud_auth_env_v3 }}"
+  when: ipa_ipaddress not in ctlplane_subnets.stdout
+  tags:
+    - undercloud-ctlplane
+    - undercloud
+    - rebuild

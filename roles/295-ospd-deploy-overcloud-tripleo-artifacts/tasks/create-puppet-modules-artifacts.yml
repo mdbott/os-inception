@@ -1,0 +1,48 @@
+---
+- name: Setup the puppet modules path
+  command: mkdir -p modules-deploy/etc/puppet/modules/
+  args:
+    chdir: /home/stack
+  become: true
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Setup the puppet modules  in the correct path
+  command: cp -rp modules modules-deploy/etc/puppet/
+  args:
+    chdir: /home/stack
+  become: true
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Change the module permissions to root
+  command: chown -R root:root modules-deploy
+  args:
+    chdir: /home/stack
+  become: true
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Archive the puppet modules
+  archive:
+    path: /home/stack/modules-deploy/etc
+    dest: /home/stack/modules.tgz
+  become: true
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild
+
+- name: Add puppet module artifact to artifact list
+  set_fact:
+    artifacts_filenames: "{{ artifacts_filenames + ['/home/stack/modules.tgz'] }}"
+  tags:
+    - deploy-artifacts
+    - templates
+    - rebuild

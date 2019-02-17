@@ -1,0 +1,3 @@
+---
+# tasks file for ospd-load-clouddata
+- include_tasks: load-clouddata.yml

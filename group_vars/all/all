@@ -457,6 +457,8 @@ networks:
     dns_nameservers: []
     pool_start: 10
     pool_end:  250
+    inspection_start: 100
+    inspection_end: 120
     use_existing: "false"
   internalapi:
     name: "{{ prefix }}_internalapi"
@@ -564,6 +566,44 @@ undercloud_packages:
   - rhosp-director-images-ipa
   - rhosp-director-images
 
+undercloud_services:
+  - httpd
+  - neutron-dhcp-agent
+  - neutron-openvswitch-agent
+  - neutron-server
+  - openstack-aodh-evaluator
+  - openstack-aodh-listener
+  - openstack-aodh-notifier
+  - openstack-ceilometer-central
+  - openstack-ceilometer-collector
+  - openstack-ceilometer-notification
+  - openstack-glance-api
+  - openstack-glance-registry
+  - openstack-heat-api-cfn
+  - openstack-heat-api
+  - openstack-heat-engine
+  - openstack-ironic-api
+  - openstack-ironic-conductor
+  - openstack-ironic-inspector-dnsmasq
+  - openstack-ironic-inspector
+  - openstack-mistral-api
+  - openstack-mistral-engine
+  - openstack-mistral-executor
+  - openstack-nova-api
+  - openstack-nova-cert
+  - openstack-nova-compute
+  - openstack-nova-conductor
+  - openstack-nova-scheduler
+  - openstack-swift-account-reaper
+  - openstack-swift-account
+  - openstack-swift-container-updater
+  - openstack-swift-container
+  - openstack-swift-object-updater
+  - openstack-swift-object
+  - openstack-swift-proxy
+  - openstack-zaqar
+  - openstack-zaqar@1
+
 # undercloud definition - used for generating undercloud.conf
 # this is based on OSPd defaults
 undercloud:
@@ -577,6 +617,8 @@ undercloud:
   masquerade_network: "{{ networks.provisioning.cidr }}"
   dhcp_start: "{{ networks.provisioning.cidr_prefix }}.5"
   dhcp_end: "{{ networks.provisioning.cidr_prefix }}.24"
+  inspection_start: "{{ networks.provisioning.cidr_prefix }}.{{ networks.provisioning.inspection_start }}"
+  inspection_end: "{{ networks.provisioning.cidr_prefix }}.{{ networks.provisioning.inspection_end }}"
   undercloud_admin_password: "{{ undercloud_admin_password }}"
 
 # undercloud environment variables used for running openstack commands
@@ -628,6 +670,7 @@ yum_prerequisites:
   - vim
   - python-devel
   - sshpass
+  - python-dns
 
 
 getpip_url: https://bootstrap.pypa.io/get-pip.py
@@ -653,6 +696,7 @@ pip_prerequisites:
   - requests==2.18.0
   - keystoneauth1==3.9.0
   - ipaddress==1.0.17
+  - notario
 
 
 pip_conflicting_rpms:
@@ -677,3 +721,11 @@ yum_poll: 5
 stack_user: stack
 
 # End internal configuration
+
+keystone_service_adminuri_insecure: false
+keystone_service_internaluri_insecure: false
+openrc_os_auth_url: "{{ os_cluster_keystone_adminurl }}"
+openrc_os_tenant_name: "{{ admin_project }}"
+openrc_os_password: "{{ admin_user_password }}"
+openrc_os_domain_name: "{{ admin_domain_name  }}"
+openrc_clouds_yml_interface: public

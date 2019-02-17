@@ -1,0 +1,14 @@
+---
+
+
+- name: Upgrade the undercloud to OSP{{ new_version }}
+  shell: >
+    set -o pipefail &&
+    openstack undercloud upgrade &>
+    /home/stack/undercloud_update_to_osp{{ new_version }}.log
+  become: yes
+  become_user: stack
+  async: 3600
+  poll: 20
+  tags:
+    - undercloud-upgrade

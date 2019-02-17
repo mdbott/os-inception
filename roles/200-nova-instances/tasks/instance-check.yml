@@ -1,17 +1,17 @@
 ---
 
-- name: Gathering facts on instances
-  os_server_facts:
-    cloud: "{{ os_cluster }}"
-    cacert: "{{ cacertfile }}"
-    server: "{{ prefix }}-*"
-    detailed: true
+- name: Get a json object containing instance networks
+  shell: "openstack --os-cloud {{ os_cluster }} server list -c Name -f value"
+  register: result
   tags:
-    - instance-facts
     - instances
-    - ceph-instances
-    - compute-instances
-    - ospd-instances
-    - pacemaker-instances
-    - service-instances
-    - infrastructure
+
+- name: set the instance_network fact
+  set_fact:
+    instances: "{{ result.stdout_lines }}"
+  tags:
+   - instances
+
+- name: Dump all
+  debug:
+    var: instances | select('match', '.*pacemaker.*') | list | length

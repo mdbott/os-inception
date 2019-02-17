@@ -1,0 +1,20 @@
+---
+
+
+- name: Reboot ospd instance
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  become: true
+  tags:
+    - undercloud-upgrade
+
+- name: Wait for the ospd instance reboot to complete
+  wait_for:
+    port: 22
+    host: "{{ hostvars['localhost']['ospd_ip'] }}"
+    search_regex: "OpenSSH"
+    delay: 10
+  delegate_to: localhost
+  tags:
+    - undercloud-upgrade

@@ -1,0 +1,3 @@
+---
+# tasks file for 243-ospd-ipa-cert-setup
+- include: undercloud-cert-setup.yml

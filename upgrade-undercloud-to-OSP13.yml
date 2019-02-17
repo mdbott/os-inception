@@ -1,0 +1,33 @@
+- name: Update Inventory
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 210-ospd-inventory-update
+      new_state: "{{ state }}"
+
+
+- name: Upgrade undercloud
+  hosts:
+    - ospd
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 600-ospd-undercloud-upgrade
+      old_version: 10
+      new_version: 11
+    - role: 600-ospd-undercloud-upgrade
+      old_version: 11
+      new_version: 12
+    - role: 600-ospd-undercloud-upgrade
+      old_version: 12
+      new_version: 13
+    - role: 255-ospd-overcloud-images
+      new_state: "present"
+      osp_version: 13
+    - role: 260-ospd-overcloud-flavor-update
+      osp_version: 13
+    - role: 290-ospd-create-deployment-scripts

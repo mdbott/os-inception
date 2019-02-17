@@ -3,3 +3,6 @@
 #- include: setup-undercloud-creds.yml
 #- include: setup-overcloud-facts.yml
 - include: setup-overcloud-links.yml
+  when: osp_version==10
+- include: setup-overcloud-links-13.yml
+  when: osp_version==13

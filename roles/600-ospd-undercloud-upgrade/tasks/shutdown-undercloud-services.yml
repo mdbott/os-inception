@@ -1,0 +1,31 @@
+---
+
+
+- name: Shutdown openstack services on the undercloud
+  systemd:
+    state: stopped
+    name: "{{ item }}"
+  with_items: "{{ undercloud_services }}"
+  when: new_version < 12
+  become: true
+
+- name: Update python-tripleoclient
+  yum:
+    name: "{{ item }}"
+    state: latest
+    update_cache: true
+  with_items:
+    - instack-undercloud
+    - openstack-puppet-modules
+    - openstack-tripleo-common
+    - python-tripleoclient
+  become: true
+
+
+- name: Install ceph-ansible
+  yum:
+    name: ceph-ansible
+    state: latest
+    update_cache: true
+  become: true
+  when: new_version == 13

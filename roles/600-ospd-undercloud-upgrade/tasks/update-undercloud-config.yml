@@ -1,0 +1,10 @@
+- name: Ensure undercloud config for OSP{{ new_version }} is deployed
+  template:
+    src: undercloud.conf.{{ new_version }}.j2
+    dest: /home/{{ stack_user }}/undercloud.conf
+    owner: stack
+    group: stack
+    mode: 0644
+  become: true
+  tags:
+    - undercloud-update

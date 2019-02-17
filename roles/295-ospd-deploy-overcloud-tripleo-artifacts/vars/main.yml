@@ -1,2 +1,3 @@
 ---
-# vars file for 285-deploy-overcloud-puppet-modules
+# vars file for 295-ospd-deploy-overcloud-tripleo-artifacts
+artifacts_filenames: []

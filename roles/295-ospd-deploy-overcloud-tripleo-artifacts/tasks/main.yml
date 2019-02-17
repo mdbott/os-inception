@@ -1,3 +1,7 @@
 ---
-# tasks file for 285-deploy-overcloud-puppet-modules
-- include: create-tripleo-artifact.yml
+# tasks file for 295-ospd-deploy-overcloud-tripleo-artifacts
+- include_tasks: create-puppet-modules-artifacts.yml
+  when: osp_version==10
+- include_tasks: create-vendordata-artifact.yml
+  when: osp_version==13
+- include_tasks: upload-tripleo-artifacts.yml

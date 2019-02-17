@@ -1,0 +1,59 @@
+---
+
+- name: Find all of the repo files.
+  find:
+    paths: "/etc/yum.repos.d/"
+    patterns: '*openstack*.repo'
+  register: repos
+  tags:
+    - undercloud-upgrade
+    - rename-repos
+
+- name: Dump all
+  debug:
+    var: repos
+
+- name: Update all repos to point to OSP{{ new_version }}
+  replace:
+    path: "{{ item.path }}"
+    regexp: "openstack-{{ old_version }}"
+    replace: "openstack-{{ new_version }}"
+  with_items: "{{ repos.files }}"
+  become: true
+  tags:
+    - undercloud-upgrade
+    - rename-repos
+
+- name: Display Path
+  debug:
+    msg: "{{ repos }}"
+    #msg: "{{ item.path }}"
+  #with_items: "{{ repos.files }}"
+  tags:
+    - rename-repos
+        
+
+- name: Rename the repo file from OSP{{ old_version }} to OSP{{ new_version }}
+  copy:
+    src: "{{ item.path }}"
+    #dest: "{{ item.path | regex_replace('(.*)', '\\1_foo')  }}"
+    dest: "{{ item.path | regex_replace('^(.*openstack)-'+old_version|string+'(.*)$', '\\1-'+new_version|string+'\\2')  }}"
+    remote_src: yes
+    force: yes
+  with_items: "{{ repos.files }}"
+  when: 
+  become: true
+  tags:
+    - undercloud-upgrade
+    - rename-repos
+
+- name: Remove old repo files
+  file: 
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ repos.files }}"
+  become: true
+  tags:
+    - undercloud-upgrade
+    - rename-repos
+ 

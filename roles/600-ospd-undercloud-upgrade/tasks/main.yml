@@ -1,0 +1,7 @@
+---
+# tasks file for 080-rhn-register
+- include: update-the-OSP-repository.yml
+- include: update-undercloud-config.yml
+- include: shutdown-undercloud-services.yml
+- include: undercloud-upgrade.yml
+- include: undercloud-reboot.yml

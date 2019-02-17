@@ -20,7 +20,7 @@
       - port-name: "{{ prefix }}_storagemgmt_{{ node_type }}_{{ item }}"
     meta:
       group: "{{ node_type }}"
-  when: use_existing_ceph == "false" and openstack_servers | length < 13 and new_state=="present"
+  when: use_existing_ceph == "false" and instances | select('match', '.*ceph.*') | list | length < 3 and new_state=="present"
   with_sequence:
     count="{{nodes[node_type].count}}"
   tags:

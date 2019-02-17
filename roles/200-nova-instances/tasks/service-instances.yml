@@ -23,7 +23,7 @@
       group: "{{ node_type }}"
   with_sequence:
     count="{{nodes[node_type].count}}"
-  when: openstack_servers | length < 13 and new_state=="present"
+  when: instances | select('match', '.*service.*') | list | length < 3 and new_state=="present"
   tags:
     - instances
     - service-instances

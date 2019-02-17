@@ -1,0 +1,3 @@
+---
+# tasks file for ospd-ctlplane
+- include: ospd-ctlplane-subnet.yml
