@@ -18,20 +18,27 @@
    state: latest
    virtualenv:  "~/.virtualenvs/{{ virtualenv_name }}"
 
+- name: Ensure wrapt is {{ new_state }}
+  pip:
+    name: wrapt
+    version: 1.10.0
+    state: forcereinstall
+    virtualenv:  "~/.virtualenvs/{{ virtualenv_name }}"
+
 - name: Ensure python-openstackclient is {{ new_state }}
   pip:
     name: python-openstackclient
     state: forcereinstall
     virtualenv:  "~/.virtualenvs/{{ virtualenv_name }}"
 
-- name: Ensure openstack is {{ new_state }}
+- name: Ensure openstacksdk is {{ new_state }}
   pip:
-    name: git+ssh://git@gitlab.consulting.redhat.com:2222/UtilityCloud/openstacksdk.git@master
+    name: "{{ git_repos.openstacksdk.url }}@{{ git_repos.openstacksdk.branch }}"
     state: "{{ new_state }}"
     virtualenv:  "~/.virtualenvs/{{ virtualenv_name }}"
 
 - name: Ensure ansible is {{ new_state }}
   pip:
-    name: git+ssh://git@gitlab.consulting.redhat.com:2222/UtilityCloud/ansible.git@devel
+    name: "{{ git_repos.ansible.url }}@{{ git_repos.ansible.branch }}"
     state: "{{ new_state }}"
     virtualenv:  "~/.virtualenvs/{{ virtualenv_name }}"

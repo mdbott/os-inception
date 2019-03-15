@@ -1,0 +1,32 @@
+---
+
+- name: Dowloading get-pip.py
+  get_url:
+    url: "{{ getpip_url }}"
+    dest: "/tmp/get-pip.py"
+  tags:
+    - pip
+
+- name: Setup pip
+  command: python /tmp/get-pip.py
+  become: true
+  tags:
+    - pip
+
+- name: Upgrade to a more recent version of pip
+  pip:
+    name: pip
+    state: latest
+  become: true
+  when: new_state == "present"
+  tags:
+    - pip
+
+- name: upgrade setuptools in the virtualenv
+  pip:
+   name: setuptools
+   state: latest
+  become: true
+  when: new_state == "present"
+  tags:
+    - pip

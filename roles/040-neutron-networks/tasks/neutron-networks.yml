@@ -8,13 +8,12 @@
       project_name: "{{ os_project }}"
     cacert: "{{ cacertfile }}"
     state: "{{ new_state }}"
+    project: "{{ os_project }}"
     name: "{{ item.value.name }}"
     port_security_enabled: "{{ item.value.port_security_enabled }}"
     endpoint_type: "{{ endpoint_type }}"
   when: item.value.use_existing == "false"
   with_dict: "{{ networks }}"
-  # environment:
-  #   OS_CLIENT_CONFIG_FILE: /home/{{ bastion_user }}/.config/openstack/clouds.yml
   tags:
     - networks
     - infrastructure

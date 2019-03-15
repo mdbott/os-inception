@@ -1,0 +1,92 @@
+---
+
+- name: Ensure the pip configuration directory is present
+  file:
+    name: ~/.pip
+    state: directory
+  become: true
+  tags:
+    - pip
+
+- name:  Ensure /root/.pip/pip.conf are {{ new_state}}
+  template:
+    src: pip.conf.j2
+    dest: ~/.pip/pip.conf
+  become: true
+  tags:
+    - pip
+
+- name: Dowloading setuptools-38.5.1.zip
+  get_url:
+    url: "{{ reposerver_url }}/setuptools-38.5.1.zip"
+    dest: "/tmp/setuptools-38.5.1.zip"
+  tags:
+    - pip
+
+- name: Unpacking pip-9.0.1.tar.gz
+  unarchive:
+    src: "/tmp/setuptools-38.5.1.zip"
+    dest: /root/
+    remote_src: yes
+    mode: 0644
+  become: true
+  tags:
+    - pip
+
+- name: Set up setuptools
+  shell: "python setup.py install"
+  args:
+    chdir: "/root/setuptools-38.5.1"
+  become: true
+  tags:
+    - pip
+
+- name: Dowloading pip-9.0.1.tar.gz
+  get_url:
+    url: "{{ reposerver_url }}/pip-9.0.1.tar.gz"
+    dest: "/tmp/pip-9.0.1.tar.gz"
+  tags:
+    - pip
+
+- name: Unpacking pip-9.0.1.tar.gz
+  unarchive:
+    src: "/tmp/pip-9.0.1.tar.gz"
+    dest: /root/
+    remote_src: yes
+    mode: 0644
+  become: true
+  tags:
+    - pip
+
+- name: Set up pip
+  shell: "python setup.py install"
+  args:
+    chdir: "/root/pip-9.0.1"
+  become: true
+  tags:
+    - pip
+
+- name: Dowloading setuptools-38.5.1.zip
+  get_url:
+    url: "{{ reposerver_url }}/setuptools-38.5.1.zip"
+    dest: "/tmp/setuptools-38.5.1.zip"
+  tags:
+    - pip
+
+- name: Unpacking pip-9.0.1.tar.gz
+  unarchive:
+    src: "/tmp/setuptools-38.5.1.zip"
+    dest: /root/
+    remote_src: yes
+    mode: 0644
+  become: true
+  tags:
+    - pip
+
+- name: Set up setuptools
+  shell: "python setup.py install"
+  args:
+    chdir: "/root/setuptools-38.5.1"
+  become: true
+  tags:
+    - pip

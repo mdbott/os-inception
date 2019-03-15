@@ -40,24 +40,48 @@ ironic_virtual_ipmi:
 # NTP server
 ntp_server: myntp.example.com
 #
-domain_name: cbr.lab
+domain_name: example.com
 ## OpenStack cluster name
-os_cluster: iron
+os_cluster: lab
 os_cluster_admincreds: default
 #
 ## keystone URL
+use_running_user: false
+undercloud_admin_password: 1800redhat
+os_username: "{{ lookup('env', 'OS_USERNAME') }}"
+os_password: "{{ lookup('env', 'OS_PASSWORD') }}"
+os_project_name: "{{ lookup('env', 'OS_PROJECT_NAME') }}"
+os_user_domain_name: "{{ lookup('env', 'OS_USER_DOMAIN_NAME') }}"
+os_project_domain_name: "{{ os_user_domain_name }}"
+os_project_id: "{{ lookup('env', 'OS_PROJECT_ID') }}"
 
-os_cluster_keystone_adminurl: https://baremetal.example.com:13357/v2.0
-os_cluster_keystone_publicurl: https://baremetal.example.com:13357/v2.0
-
+os_cluster_keystone_publicurl: "{{ lookup('env', 'OS_AUTH_URL') }}"
+os_cluster_keystone_adminurl: "{{ os_cluster_keystone_publicurl }}"
 # keystone API version
-identity_api_version: 2
+identity_api_version: "{{ lookup('env', 'OS_IDENTITY_API_VERSION')|int }}"
 # Endpoint to use for cloud interactions. Use 'admin' for keystone v2 and public for keystone v3
-endpoint_type: admin
+endpoint_type: "{{ lookup('env', 'OS_INTERFACE') }}"
 
+
+ansible_user: "{{ os_username }}"
+ansible_ssh_pass: "{{ os_password }}"
+# admin user name, password and role
+admin_user: "{{ os_username }}"
+admin_user_password: "{{ os_password }}"
+admin_project: "{{ os_project_name }}"
+admin_domain_name: "{{ os_project_domain_name }}"
+admin_user_domain_name: "{{ os_user_domain_name }}"
+admin_project_domain_name: "{{ os_project_domain_name }}"
+project_domain_name: "{{ os_project_domain_name }}"
+bastion_user: cloud-user
+bastion_user_group: "{{ bastion_user }}"
+ospd_user: cloud-user
+ospd_user_group: cloud-user
+
+icloud_puppet_branch: "unclass_{{ os_project }}"
 #
 ## OpenStack user domain name
-user_domain_name: org
+user_domain_name: "{{ os_user_domain_name }}"
 #
 ## Compute API version
 compute_api_version: 2
@@ -67,27 +91,27 @@ compute_api_version: 2
 openstack_user_auth_env_v2:
   OS_NO_CACHE: True
   COMPUTE_API_VERSION: 2.1
-  OS_USERNAME: "{{ ansible_user }}"
+  OS_USERNAME: "{{ os_username }}"
   OS_PROJECT_NAME: "{{ os_project }}"
   OS_CLOUDNAME: overcloud
   OS_AUTH_URL: "{{ os_cluster_keystone_adminurl }}"
   NOVA_VERSION: 1.1
-  OS_PASSWORD: "{{ ansible_ssh_pass }}"
+  OS_PASSWORD: "{{ os_password }}"
   OS_CACERT: "{{ cacertfile }}"
 
 openstack_user_auth_env_v3:
-  OS_USER_DOMAIN_NAME: "{{ user_domain_name }}"
-  OS_PROJECT_DOMAIN_NAME: "{{ project_domain_name }}"
+  OS_USER_DOMAIN_NAME: "{{ os_user_domain_name }}"
+  OS_PROJECT_DOMAIN_NAME: "{{ os_project_domain_name }}"
   OS_IDENTITY_API_VERSION: "{{ identity_api_version  }}"
-  OS_INTERFACE: public
+  OS_INTERFACE: "{{ endpoint_type }}"
 
 # this is required by shell commands in roles/070-nova-flavors-access/ and can go away
 #  as soon as os_flavor_access module is available
 openstack_admin_auth_env_v2:
   OS_NO_CACHE: True
   COMPUTE_API_VERSION: 2.1
-  OS_USERNAME: "{{ admin_user }}"
-  OS_PROJECT_NAME: "{{ admin_project }}"
+  OS_USERNAME: "{{ os_username }}"
+  OS_PROJECT_NAME: "{{ os_project_name }}"
   OS_CLOUDNAME: overcloud
   OS_AUTH_URL: "{{ os_cluster_keystone_adminurl }}"
   NOVA_VERSION: 1.1
@@ -95,9 +119,9 @@ openstack_admin_auth_env_v2:
   OS_CACERT: "{{ cacertfile }}"
 
 openstack_admin_auth_env_v3:
-  OS_PROJECT_ID: "{{ admin_project_id }}"
-  OS_USER_DOMAIN_NAME: "{{ admin_domain_name  }}"
-  OS_PROJECT_DOMAIN_NAME: "{{ admin_domain_name  }}"
+  OS_PROJECT_ID: "{{ os_project_id }}"
+  OS_USER_DOMAIN_NAME: "{{ os_user_domain_name  }}"
+  OS_PROJECT_DOMAIN_NAME: "{{ os_project_domain_name  }}"
   OS_IDENTITY_API_VERSION: "{{ identity_api_version  }}"
   OS_INTERFACE: public
 
@@ -116,9 +140,9 @@ key_content: |
   -----END RSA PRIVATE KEY-----
 
 
-external_network: external_net
-
-cloud_access: private
+external_network: public
+internet_access: true
+cloud_access: public
 cloud_access_network: internal_management
 cloud_access_subnet: "192.168.27."
 cloud_access_last_octet: "{{ os_project[-1]|int * 2 +30}}"
@@ -140,7 +164,9 @@ activation_key: satellite_registration_key
 
 reposerver_url: http://yum.example.com
 
-osp_version: 10
+# No default is provided. This should be supplied at the command line with_items
+# extra_vars
+osp_version: 13
 
 yum_repos:
   - rhel-7-server-extras-rpms
@@ -151,9 +177,9 @@ yum_repos:
   - rhel-7-server-rpms
   - rhel-7-server-satellite-tools-6.2-rpms
   - rhel-7-server-openstack-{{ osp_version }}-tools-rpms
-  - rhel-7-server-rhscon-2-installer-rpms
-  - rhel-7-server-rhceph-2-mon-rpms
-  - rhel-7-server-rhceph-2-osd-rpms
+  - rhel-7-server-rhceph-3-tools-rpms
+  - rhel-7-server-rhceph-3-mon-rpms
+  - rhel-7-server-rhceph-3-osd-rpms
   - rhel-ha-for-rhel-7-server-rpms
 
 bastion_yum_repos:
@@ -166,16 +192,16 @@ bastion_yum_repos:
   - rhel-7-server-rpms
   - rhel-7-server-satellite-tools-6.2-rpms
   - rhel-7-server-openstack-10-tools-rpms
-  - rhel-7-server-rhscon-2-installer-rpms
-  - rhel-7-server-rhceph-2-mon-rpms
-  - rhel-7-server-rhceph-2-osd-rpms
+  - rhel-7-server-rhceph-3-tools-rpms
+  - rhel-7-server-rhceph-3-mon-rpms
+  - rhel-7-server-rhceph-3-osd-rpms
 
 
 yum_gpgcheck: no
 yum_gpgcheck_key: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
 
 # satellite URL to be used
-satellite_url: https://satellite6.example.com/pulp/repos
+satellite_url: 'http://sat6.example.com'
 
 # Satellite organisation to be used
 satellite_org: MyOrganization
@@ -190,6 +216,10 @@ instance_creation_timeout: 200
 instance_az: "nova"
 
 
+
+# this indicates what git repos need to be cloned in order to install the components required for MaxHammer
+# make sure that your ansible host can clone the repo (add the appropriate keys!)
+
 git_repo_server: gitlab.consulting.redhat.com
 
 git_repos:
@@ -197,11 +227,19 @@ git_repos:
   icloud: "ssh://git@gitlocation.server.example:2222/Group/icloud-puppet.git"
   ceph_ansible:
     url: "ssh://git@gitlocation.server.example:2222/Group/ceph-ansible.git"
-    branch: "stable-2.2"
+    branch: "v3.1.10"
   os_inception:
     url: "ssh://git@gitlocation.server.example:2222/Group/os-inception.git"
-    branch: "allinone"
-
+    branch: "keystonev3"
+  vendordata:
+    url: "ssh://git@gitlocation.server.example:2222/Group/vendordata.git"
+    branch: "v0.2.0"
+  openstacksdk:
+    url: "git+ssh://git@gitlocation.server.example:2222/Group/openstacksdk.git"
+    branch: "master"
+  ansible:
+    url: "git+ssh://git@gitlocation.server.example:2222/Group/ansible.git"
+    branch: "devel"
 
 r10k_environment: icloud_{{ icloud_puppet_branch }}
 
@@ -521,7 +559,7 @@ networks:
     enable_dhcp: true
     no_gateway_ip: false
     gateway_ip: 10.0.0.1
-    dns_nameservers: ["10.76.23.25"]
+    dns_nameservers: ["8.8.8.8"]
     pool_start: 10
     pool_end: 250
     use_existing: "false"
@@ -620,13 +658,16 @@ undercloud:
   inspection_start: "{{ networks.provisioning.cidr_prefix }}.{{ networks.provisioning.inspection_start }}"
   inspection_end: "{{ networks.provisioning.cidr_prefix }}.{{ networks.provisioning.inspection_end }}"
   undercloud_admin_password: "{{ undercloud_admin_password }}"
+  # Options are 'none' (no encryption), 'localca', 'ipa'
+  undercloud_encryption: none
+  use_novajoin: false
 
 # undercloud environment variables used for running openstack commands
 # on the undercloud using shell module
 undercloud_auth_env_v2:
   NOVA_VERSION: 1.1
   OS_PASSWORD: "{{ undercloud_admin_password }}"
-  OS_AUTH_URL: "https://{{ undercloud.undercloud_public_vip }}:13000/v2.0"
+  OS_AUTH_URL: "http://{{ undercloud.network_gateway }}:5000/v2.0"
   OS_USERNAME: admin
   OS_TENANT_NAME: admin
   COMPUTE_API_VERSION: 1.1
@@ -634,12 +675,12 @@ undercloud_auth_env_v2:
   OS_NO_CACHE: True
   OS_CLOUDNAME: undercloud
   OS_IMAGE_API_VERSION: 1
-  OS_CACERT: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+
 
 undercloud_auth_env_v3:
   NOVA_VERSION: 1.1
   OS_PASSWORD: "{{ undercloud_admin_password }}"
-  OS_AUTH_URL: "https://{{ undercloud.undercloud_public_vip }}:13000/"
+  OS_AUTH_URL: "http://{{ undercloud.network_gateway }}:5000/"
   OS_USERNAME: admin
   OS_AUTH_TYPE: password
   OS_PROJECT_NAME: admin
@@ -650,7 +691,7 @@ undercloud_auth_env_v3:
   OS_NO_CACHE: True
   OS_CLOUDNAME: undercloud
   OS_IDENTITY_API_VERSION: 3
-  OS_CACERT: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+
 
 # overcloud image files which will be unpacked and uploaded to undercloud glance
 overcloud_image_files:
@@ -676,7 +717,7 @@ yum_prerequisites:
 getpip_url: https://bootstrap.pypa.io/get-pip.py
 
 
-virtualenv_name: openstacksdk2
+virtualenv_name: openstacksdk1
 
 pip_module_url: http://repos.gpslab.cbr.redhat.com/modules/
 
@@ -690,8 +731,8 @@ old_pip_prerequisites:
 pip_prerequisites:
   - python-openstackclient
   - python-neutronclient
-  - openstacksdk==0.15
-  - ansible==2.6.4
+  - openstacksdk==0.17
+  - ansible==2.7.8
   - stevedore==1.27
   - requests==2.18.0
   - keystoneauth1==3.9.0

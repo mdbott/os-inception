@@ -17,6 +17,10 @@
   with_nested:
     - "{{ nodes[node_type].networks }}"
     - "{{ last_octet[node_type] }}"
+  environment:
+    OS_PROJECT_NAME: "{{ os_project }}"
+    OS_PROJECT_ID: "{{ devcloud_project_id }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ admin_user_domain_name }}"
   tags:
     - ports
     - infrastructure

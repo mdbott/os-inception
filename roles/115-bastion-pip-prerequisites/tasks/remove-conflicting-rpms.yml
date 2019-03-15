@@ -5,3 +5,5 @@
     name: "{{ pip_conflicting_rpms }}"
     state: "absent"
   become: true
+  tags:
+    - pip

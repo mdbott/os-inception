@@ -1,0 +1,23 @@
+---
+
+- name: Gathering the facts on the {{ admin_user_domain_name }} domain.
+  os_keystone_domain_facts:
+    cloud: "{{ os_cluster_admincreds }}"
+    name: "{{ admin_user_domain_name }}"
+  when: create_project==true and identity_api_version|int==3
+  tags:
+    - domain-facts
+    - infrastructure
+
+- name: set the user domain id fact
+  set_fact:
+    user_domain_id: "{{ openstack_domains[0]['id'] }}"
+  tags:
+    - domain-facts
+    - infrastructure
+
+- debug:
+    var: openstack_domains[0]["id"]
+  tags:
+    - domain-facts
+    - infrastructure

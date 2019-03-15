@@ -8,7 +8,6 @@
       project_name: "{{ os_project }}"
     cacert: "{{ cacertfile }}"
     project: "{{ os_project }}"
-    cacert: "{{ cacertfile }}"
     state: "{{ new_state }}"
     name: "{{ item.value.name }}"
     network_name: "{{ item.value.name }}"

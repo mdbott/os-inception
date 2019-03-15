@@ -39,7 +39,7 @@
 - name: Ensure undercloud is {{ new_state }}
   shell: >
     set -o pipefail &&
-    openstack undercloud install >
+    openstack undercloud install &>
     /home/stack/undercloud_install.log
   become: yes
   become_user: stack

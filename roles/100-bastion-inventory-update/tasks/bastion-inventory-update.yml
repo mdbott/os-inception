@@ -8,6 +8,10 @@
       password: "{{ ansible_ssh_pass }}"
       project_name: "{{ os_project }}"
     server: "{{ prefix}}-{{ node_type}}"
+  environment:
+    OS_PROJECT_NAME: "{{ os_project }}"
+    OS_PROJECT_ID: "{{ devcloud_project_id }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ admin_user_domain_name }}"
   tags:
     - bastion-instance
     - bastion-inventory
@@ -37,12 +41,12 @@
         StrictHostKeyChecking no
         UserKnownHostsFile=/dev/null
         IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
-      Host {{ prefix}}-{{ node_type}}.{{ domain_name }}
+      Host {{ prefix }}-{{ node_type }}.{{ domain_name }}
         User {{ bastion_user }}
         StrictHostKeyChecking no
         UserKnownHostsFile=/dev/null
         IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
-      Host {{ prefix}}-{{ node_type}}
+      Host {{ prefix }}-{{ node_type }}
         User {{ bastion_user }}
         StrictHostKeyChecking no
         UserKnownHostsFile=/dev/null
@@ -56,7 +60,7 @@
   lineinfile:
     dest: /etc/hosts
     regexp: '{{ bastion_float }}.*'
-    line: '{{ bastion_float }} {{ prefix}}-{{ node_type}}.{{ domain_name }} {{ prefix}}-{{ node_type}}'
+    line: '{{ bastion_float }} {{ prefix }}-{{ node_type }}.{{ domain_name }} {{ prefix }}-{{ node_type }}'
     state: "{{ new_state }}"
   become: true
   tags:
@@ -65,7 +69,7 @@
 
 - name: Ensure the bastion instance is {{ new_state }} in the bastion group
   add_host:
-    hostname: "{{ prefix}}-{{ node_type}}"
+    hostname: "{{ prefix }}-{{ node_type }}"
     ansible_ssh_host: "{{ bastion_float }}"
     ansible_ssh_user: cloud-user
     become_user: root

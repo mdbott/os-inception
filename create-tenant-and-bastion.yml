@@ -15,8 +15,10 @@
     - role: 010-merge-os-creds
     - role: 015-openstack-client
       new_state: "{{ state }}"
+    - role: 018-keystone-domain-facts
     - role: 020-keystone-project
       new_state: "{{ state }}"
+    - role: 022-keystone-project-facts
     - role: 025-keystone-role
       new_state: "{{ state }}"
     - role: 027-nested-virt-host-aggregate
@@ -56,7 +58,7 @@
   vars:
     state: present
   tags:
-    - bastion-instance
+    - bastion-deploy
   tasks:
   roles:
     - role: 105-bastion-networking

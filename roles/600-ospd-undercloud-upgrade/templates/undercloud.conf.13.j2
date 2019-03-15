@@ -14,7 +14,7 @@ enable_tempest = true
 cidr = {{ undercloud.network_cidr }}
 dhcp_start = {{ undercloud.dhcp_start }}
 dhcp_end = {{ undercloud.dhcp_end }}
-inspection_iprange = 192.0.2.100,192.0.2.120
+inspection_iprange = {{ undercloud.inspection_start }},{{ undercloud.inspection_end }}
 gateway = {{ undercloud.network_gateway }}
 masquerade = true
 

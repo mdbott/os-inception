@@ -10,9 +10,7 @@
     domain_id: "{{ user_domain_id }}"
     enabled: true
     endpoint_type: "{{ endpoint_type }}"
-  # environment:
-  #   OS_CLIENT_CONFIG_FILE: /home/{{ bastion_user }}/.config/openstack/clouds.yml
-  when: create_project==true and identity_api_version==3
+  when: create_project==true and identity_api_version|int==3
   tags:
     - project
     - infrastructure
@@ -26,9 +24,7 @@
     description: "{{ os_project}} project."
     enabled: true
     endpoint_type: "{{ endpoint_type }}"
-  # environment:
-  #   OS_CLIENT_CONFIG_FILE: /home/{{ bastion_user }}/.config/openstack/clouds.yml
-  when: create_project==true and identity_api_version==2
+  when: create_project==true and identity_api_version|int==2
   tags:
     - project
     - infrastructure

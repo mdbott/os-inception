@@ -10,7 +10,7 @@
 
 - name: Ensure the bastion instance is {{ new_state }} in the bastion group
   add_host:
-    hostname: "{{ prefix }}-ospd-1"
+    hostname: "{{ prefix}}-ospd-1"
     ansible_ssh_host: "{{ ospd_ip }}"
     ansible_ssh_user: cloud-user
     become_user: root

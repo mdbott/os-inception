@@ -73,17 +73,13 @@ Software:
 
 Setup Instructions
 ==============
-_in this example, we call our new OS-Inception openstack "os1"_
-
-The following instructions can be used to build or rebuild a dev cloud using os-inception.
-## Prerequisites
-
-
+Requirements
 - A system running RHEL7.
-- The ```os-inception``` directory cloned to the home directory from the git branch ```allinone```
+- Create an ssh key for the account you are using and add this into your gitlab account to grant access to the git repos you need to clone.
+- The ```os-inception``` directory cloned to the home directory from the git branch ```keystonev3```
 
     ```
-    git clone -b allinone ssh://git@gitlocation.server.example.com:2222/UtilityCloud/os-inception.git
+    git clone -b keystonev3 ssh://git@example.com:2222/UtilityCloud/os-inception.git
     ```
 - The following packages installed: git, ansible, python-virtualenvwrapper, gcc,make, python-devel
 
@@ -93,43 +89,62 @@ The following instructions can be used to build or rebuild a dev cloud using os-
 
 - A Python virtualenv activated with the following command
 
-    ```
+    ```  
     . /usr/bin/virtualenvwrapper.sh
     ```
 
-- Passwordless sudo for the system from your current account
-
-- Ensure that the the following entries are correct for the cloud you are using
-  - ```os_cluster_keystone_publicurl```
-  - ```os_cluster_keystone_adminurl```
-  - ```cacert```
-
-Note that if you update and of these settings at any time you must re-run the ```create-tenant-and-bastion.yaml``` playbook to have the new settings applied. This is probably a good time to update the clouddata repo with details for your new dev cloud.
 
 
-- Review everything in ```os-inception/group_vars/all/all``` if you are setting up to build on a new cloud.
-- Configure the Vault
-    - Use the vault template to create the password vault to encrypt the cloud admin credentials
 
-        ```
-        cd os-inception
-        cp group_vars/vault/vault_passwords.yml.template group_vars/vault/vault_passwords.yml
-        ```
 
-    - Edit the ```vault_passwords.yml``` file and update with  the admin credentials for the cloud.
+This is probably a good time to update the clouddata repo with details for your new dev cloud.
 
-        ```
-        vim group_vars/vault/vault_passwords.yml
-        ```
 
-    - The edit file will now be encrypted to protect the credential information.
+## Create a new clouddata file
 
-        ```
-        ansible-vault encrypt group_vars/vault/vault_passwords.yml
-        New Vault password:
-        Confirm New Vault password:
-        Encryption successful
-        ```
+- Clone these files from the Utility cloud repository
+
+    ```
+    git clone ssh://git@example.com:2222/UtilityCloud/clouddata.git
+    ```
+- Create a copy of unclass yaml file for your inception cloud  i.e unclass_os1.yaml
+
+    ```
+    cd clouddata
+    cp unclass_os10.yaml unclass_<inception cloud name>.yaml
+    ```
+
+- Update the copy of the file with the correct values for
+  - ```domain_prefix```
+  - ```hostnameformat```
+
+- Push file back to git:
+    ```
+    git add -A
+    git commit -m "Added new clouddata file"
+    git push
+    ```
+
+## Create new branch for the icloud\_puppet repo in git named "unclass\_\<inception cloud name\>"
+
+
+- In the clouddata repo ensure that a clouddata file exists that is named the same as your icloud_puppet_branch. E.g for the os1 inception cloud there is a branch in icloud_puppet called "unclass_os1" and a corresponding file ```unclass_os1.yaml``` in the clouddata repo that contains the cloud data for this dev cloud.
+
+
+## Setup your openstack credentials on the jumphost  for the baremetal cloud you are using.
+
+- Browse to the bare metal cloud horizon interface and login to the IPA domain with your IPA credentials.
+
+- Select the grp-cloud_ops project.
+- On the top tab select project and select "Project" -> "API Access"
+- Click on "Download Openstack RC File (Identity API v3)" and save the file grp-cloud_ops-openrc.sh.
+- Edit the file and add the path to the cacert to the baremetal cloud by adding a line
+```
+export OS_CACERT=/<path to your baremetal cloud cacert>
+```
+
+- Upload this file to your account on the jumphost.
+
 
 ## Run Ansible Playbooks
 
@@ -144,10 +159,22 @@ Run these playbooks in the ```os-inception/``` directory after the steps above h
 - Select this Python virtualenv to work on openstacksdk2. This is virtualenv contains all of the correct Python dependencies for the tasks in the Ansible playbooks that will be run.
 
     ```
-    workon openstacksdk2
+    workon openstacksdk1
     ```
 
-- Run the playbook to create the dev cloud tenant and bastion instance. Replace ```<project_name>``` with the name of your cloud/project for example ```os_project=os6```
+- Load your openstack credentials with.
+
+```
+. grp-cloud_ops-openrc.sh
+```
+  and enter your IPA password when prompted. It is a good idea at this point to confirm that your credentials are properly set up by running
+
+```
+openstack domain show
+```
+
+
+- Run the playbook to create the dev cloud tenant and bastion instance. Replace ```<project_name>``` with the name of your cloud/project for example ```os_project=os1```
 
     ```
     ansible-playbook create-tenant-and-bastion.yml -vv --extra-vars "os_project=<project_name">
@@ -155,7 +182,7 @@ Run these playbooks in the ```os-inception/``` directory after the steps above h
 
 - Note that in the case where you are using your own account to access the baremetal cloud you should edit ```group_vars/all/project``` to set and comment out the following lines
 
-    - Set:
+    - Set:  
         - ```use_running_user: true```
     - Comment out:
         - ```ansible_user```
@@ -170,7 +197,7 @@ Run these playbooks in the ```os-inception/``` directory after the steps above h
 - After the ```create-tenant-and-bastion.yml``` has run, login to the newly created and configured bastion instance.
 
     ```
-    ssh os6-bastion
+    ssh os1-bastion
     ```
 
 - Change into the os-inception directory on the bastion instance and run the ```create-openstack-on-openstack.yml``` playbook
@@ -179,37 +206,11 @@ Run these playbooks in the ```os-inception/``` directory after the steps above h
     ansible-playbook create-openstack-on-openstack.yml -vv --extra-vars "os_project=<project_name">
     ```
 
-- **If you are using external Ceph skip the Ceph playbook and instead just verify that the ceph user and key match.**
 
-    - Run this command on the OpenStack Platform Director (OSPD) instance
-
-    ```
-    cat overcloud/puppet-ceph-external.yaml
-    ```
-
-    - Run this command on Ceph node
-
-    ```
-    ceph auth list
-
-      client.openstack
-
-           key: AQAcGyVZQHdyMxAAOVk2B8pbTeRtrBcP/r0SbQ==
-
-           caps: [mon] allow r
-
-           caps: [osd] allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images, allow rwx pool=backups, allow rwx pool=metrics
-    ```
-
-- If you are using built-in Ceph then run the Ceph Ansible playbook
-
-    ```
-    ansible-playbook ceph-setup.yml -vv
-    ```
 
 ## Start Overcloud Deploy
 
-**Note that these are going to be added to the create-openstack-on-openstack playbook and should have been run automatically. Leaving in documentation for now**
+
 
 - On the **Bastion Host** run the following playbook from within the ```os-inception``` directory.
 
@@ -237,7 +238,7 @@ Run these playbooks in the ```os-inception/``` directory after the steps above h
 - Run deploy
 
     ```
-    ./deploy.sh
+    ./deploy-osp13.sh
     ```
 
 - Deploy should complete in ~45mins
@@ -250,22 +251,6 @@ Run these playbooks in the ```os-inception/``` directory after the steps above h
 
 ## Post Deploy
 
-**Post deploy playbook makes no changes when I tried to rebuild os6. Is the information below up to date?**
-
-This Ansible playbook and additonal steps will setup the ```/etc/hosts```, ```~/.ssh/config``` & ```~/.ssh/heat-admin.priv``` on the bastion instance to allow access to the overcloud hosts and make the Horizon dashboard accessible.
-
-- On the **BASTION** instance run the ```stack-post-deploy-all.yaml``` Ansible playbook
-
-    ```
-    ansible environment -a uptime
-    ansible-playbook  stack-post-deploy-all.yml -vv --tags keystonev3,horizon,uc-config
-    ```
-
-- Allow Horizon dashboard access to the overcloud by running the following iptables command **on all of the pacemaker nodes** after deployment.
-
-    ```
-    iptables -I INPUT 24 -p tcp -m multiport --dports 80,443 -m comment --comment "126 horizon_haproxy" -m state --state NEW -j ACCEPT
-    ```
 
 - You can then access the Horizon dashboard interface by editing the ssd_config on the bastion host as root
 

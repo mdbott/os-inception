@@ -1,0 +1,3 @@
+---
+- include: keystone-domain-facts.yml
+  when: identity_api_version|int==3

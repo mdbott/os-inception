@@ -1,0 +1,23 @@
+---
+
+- name: Gathering the facts on the {{ os_project }} project
+  os_project_facts:
+    cloud: "{{ os_cluster_admincreds }}"
+    name: "{{ os_project }}"
+  when: create_project==true and identity_api_version|int==3
+  tags:
+    - project-facts
+    - infrastructure
+
+- name: set the project id fact
+  set_fact:
+    devcloud_project_id: "{{ openstack_projects[0]['id'] }}"
+  tags:
+    - project-facts
+    - infrastructure
+
+- debug:
+    var: openstack_projects[0]["id"]
+  tags:
+    - project-facts
+    - infrastructure

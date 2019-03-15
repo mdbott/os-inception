@@ -54,6 +54,7 @@
     groups:
       - osds
       - mons
+      - mgrs
       - all
   with_items: "{{ openstack_servers }}"
   tags:

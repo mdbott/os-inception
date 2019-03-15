@@ -3,9 +3,15 @@
     name: ~/.config/openstack
     state: directory
   become: false
+  tags:
+    - client
+    - infrastructure
 
 - name:  Ensure openstack client configuration is present
   template:
     src: clouds.yml.j2
     dest: ~/.config/openstack/clouds.yaml
   become: false
+  tags:
+    - client
+    - infrastructure

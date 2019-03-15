@@ -28,6 +28,5 @@
     - role: 255-ospd-overcloud-images
       new_state: "present"
       osp_version: 13
-    - role: 260-ospd-overcloud-flavor-update
-      osp_version: 13
     - role: 290-ospd-create-deployment-scripts
+      osp_version: 10

@@ -27,7 +27,7 @@
 
 - name: Put in place the temporary OS-Inception IPMItool
   template:
-    src: "templates/ipmitool.v{{ identity_api_version }}.j2"
+    src: "templates/ipmitool.v{{ hostvars['localhost']['clouds_yaml']['clouds']['default']['identity_api_version']}}.j2"
     dest: /usr/bin/ipmitool
     mode: 0755
     owner: root

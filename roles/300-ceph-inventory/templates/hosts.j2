@@ -6,3 +6,7 @@
 {% for server in openstack_servers %}
 {{ instance_networks[server.name][networks.storage.name] }}
 {% endfor %}
+[mgrs]
+{% for server in openstack_servers %}
+{{ instance_networks[server.name][networks.storage.name] }}
+{% endfor %}

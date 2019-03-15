@@ -1,26 +1,21 @@
 [DEFAULT]
 local_ip = {{ undercloud.local_ip }}
-network_gateway = {{ undercloud.network_gateway }}
-undercloud_public_vip = {{ undercloud.undercloud_public_vip }}
-undercloud_admin_vip = {{ undercloud.undercloud_admin_vip }}
 local_interface = {{ undercloud.local_interface }}
 local_mtu = {{ undercloud.local_mtu }}
 enable_tempest = true
-
-generate_service_certificate = true
-certificate_generation_ca = local
-
+undercloud_hostname = {{ os_project }}-ospd-1.{{ domain_name }}
+{% if undercloud.use_novajoin|bool %}
 enable_novajoin = true
 ipa_otp = {{ novajoin_ipa_otp.stdout }}
-undercloud_hostname = {{ os_project }}-ospd-1.instance.{{ domain_name }}
 undercloud_nameservers = {{ novajoin_ipa_ipaddr }}
 overcloud_domain_name = {{ domain_name }}
+{% endif %}
 
 [ctlplane-subnet]
 cidr = {{ undercloud.network_cidr }}
 dhcp_start = {{ undercloud.dhcp_start }}
 dhcp_end = {{ undercloud.dhcp_end }}
-inspection_iprange = 192.0.2.100,192.0.2.120
+inspection_iprange = {{ undercloud.inspection_start }},{{ undercloud.inspection_end }}
 gateway = {{ undercloud.network_gateway }}
 masquerade = true
 

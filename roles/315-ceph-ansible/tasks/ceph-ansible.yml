@@ -1,5 +1,4 @@
 ---
-
 - name: Set group_vars for ceph-ansible
   template:
     src: "templates/{{item}}.yml.j2"
@@ -15,4 +14,11 @@
     src: "/home/{{ bastion_user }}/ceph-ansible/site.yml.sample"
     dest: "/home/{{ bastion_user }}/ceph-ansible/site.yml"
     remote_src: yes
+  tags: ceph-ansible
+
+
+- name: Set relative path for the ansible logfile for ceph-ansible
+  template:
+    src: "templates/ansible.cfg.j2"
+    dest: "/home/{{ bastion_user }}/ceph-ansible/ansible.cfg"
   tags: ceph-ansible

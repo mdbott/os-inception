@@ -1,7 +1,9 @@
 - name: Run ceph-ansible
-  shell: "ansible-playbook -i hosts/inventory site.yml"
+  shell: >
+    set -o pipefail &&
+    ansible-playbook -i hosts/inventory site.yml &>
+    /home/{{ bastion_user }}/ceph_install.log
   args:
     chdir: ~/ceph-ansible
   tags:
     - ceph-ansible-run
-

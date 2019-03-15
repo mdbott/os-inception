@@ -3,7 +3,7 @@
   template:
     src: gemrc.j2
     dest: ~/.gemrc
-
+  become: true
 
 - name: Ensure Gemfile for bundler install is {{ new_state }}
   template:

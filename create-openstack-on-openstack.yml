@@ -15,6 +15,8 @@
   roles:
     #- role: 010-merge-os-creds
     - role: 007-set-running-user
+    - role: 018-keystone-domain-facts
+    - role: 022-keystone-project-facts
     - role: 200-nova-instances
       new_state: "{{ state }}"
       when: preprovisioned_nodes|bool == false
@@ -30,6 +32,7 @@
       access_user: "{{ bastion_user }}"
       access_user_group: "{{ bastion_user_group }}"
     - role: 160-bastion-load-clouddata
+    - role: 215-ospd-load-clouds-yaml
 
 ##################################################
 #                                                #
@@ -54,8 +57,10 @@
     - role: 240-ospd-stack-user
       new_state: "{{ state }}"
     - role: 242-ospd-load-clouddata
+      when: undercloud.use_novajoin|bool == true
     #- role: 243-ospd-ipa-cert-setup
     - role: 244-ospd-novajoin
+      when: undercloud.use_novajoin|bool == true
     - role: 245-ospd-undercloud-config
       new_state: "{{ state }}"
     - role: 250-ospd-undercloud-install
@@ -65,6 +70,7 @@
       new_state: "{{ state }}"
     - role: 260-ospd-overcloud-flavor-update
     - role: 262-ospd-ctlplane
+      when: undercloud.use_novajoin|bool == true
     - role: 265-ospd-ironic-config
       new_state: "{{ state }}"
     - role: 001-baremetal-cloud-cacert-import

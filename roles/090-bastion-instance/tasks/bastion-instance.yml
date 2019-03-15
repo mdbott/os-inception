@@ -9,7 +9,7 @@
       password: "{{ ansible_ssh_pass }}"
       project_name: "{{ os_project }}"
     cacert: "{{ cacertfile }}"
-    name: "{{ prefix}}-{{ node_type}}"
+    name: "{{ prefix }}-{{ node_type }}"
     image: "{{ nodes[node_type].image }}"
     key_name: "{{ key_name }}"
     timeout: "{{ instance_creation_timeout }}"
@@ -42,7 +42,7 @@
       password: "{{ ansible_ssh_pass }}"
       project_name: "{{ os_project }}"
     cacert: "{{ cacertfile }}"
-    name: "{{ prefix}}-{{ node_type}}"
+    name: "{{ prefix }}-{{ node_type }}"
     image: "{{ nodes[node_type].image }}"
     key_name: "{{ key_name }}"
     timeout: "{{ instance_creation_timeout }}"
@@ -60,6 +60,10 @@
       group: "{{ node_type }}"
   with_sequence:
     count="{{nodes[node_type].count}}"
+  environment:
+    OS_PROJECT_NAME: "{{ os_project }}"
+    OS_PROJECT_ID: "{{ devcloud_project_id }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ admin_user_domain_name }}"
   tags:
     - bastion-instance
     - infrastructure

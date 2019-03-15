@@ -9,13 +9,13 @@ export PYTHONWARNINGS="ignore:Certificate has no, ignore:A true SSLContext objec
 export OS_PROJECT_NAME={{ os_project }}
 export PS1='[\[\e[91m\]\u@\h \W\[\e[m\]\[\e[96m\](OpenStack: $OS_USERNAME@$OS_PROJECT_NAME)\[\e[m\]]$ '
 export OS_CACERT={{ cacertfile }}
-#{% if identity_api_version == "2" %}
+#{% if hostvars['localhost']['clouds_yaml']['clouds']['default']['identity_api_version']|int == "2" %}
 #export OS_IDENTITY_API_VERSION=2
 #unset OS_USER_DOMAIN_NAME
 #unset OS_PROJECT_DOMAIN_NAME
 #{% endif %}
-#{% if identity_api_version == "3" %}
-#export OS_IDENTITY_API_VERSION={{ identity_api_version= }}
+#{% if hostvars['localhost']['clouds_yaml']['clouds']['default']['identity_api_version']|int == "3" %}
+#export OS_IDENTITY_API_VERSION={{ hostvars['localhost']['clouds_yaml']['clouds']['default']['identity_api_version'] }}
 #export OS_USER_DOMAIN_NAME={{ user_domain_name }}
 #export OS_PROJECT_DOMAIN_NAME={{ project_domain_name }}
 #{% endif %}

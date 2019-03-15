@@ -5,10 +5,13 @@ clouds:
       username: {{ admin_user }}
       password: {{ admin_user_password }}
       project_name: {{ admin_project }}
-{% if identity_api_version == 3 %}
-      user_domain_name: {{ admin_domain_name }}
-      project_domain_name: {{ admin_domain_name }}
+{% if identity_api_version|int == 3 %}
+      project_id: {{ os_project_id }}
+      user_domain_name: {{ admin_user_domain_name }}
+      project_domain_name: {{ admin_project_domain_name }}
     identity_api_version: {{ identity_api_version }}
     compute_api_version: {{ compute_api_version }}
+    region_name: regionOne
+    interface: {{ endpoint_type }}
 {% endif %}
     cacert: {{ cacertfile }}

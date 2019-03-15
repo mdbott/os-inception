@@ -6,6 +6,8 @@
     ansible_python_interpreter: "~/.virtualenvs/{{ virtualenv_name }}/bin/python"
   tasks:
   roles:
+    - role: 018-keystone-domain-facts
+    - role: 022-keystone-project-facts
     - role: 100-bastion-inventory-update
       new_state: "{{ state }}"
     - role: 095-bastion-floatingip
@@ -16,6 +18,7 @@
       new_state: "{{ state }}"
     - role: 080-glance-images
       new_state: "{{ state }}"
+    - role: 022-keystone-project-facts
     - role: 055-neutron-ports
       new_state: "{{ state }}"
     - role: 050-neutron-router
@@ -26,5 +29,6 @@
       new_state: "{{ state }}"
     - role: 035-openstack-quota
       new_state: "{{ state }}"
+    - role: 018-keystone-domain-facts
     - role: 020-keystone-project
       new_state: "{{ state }}"

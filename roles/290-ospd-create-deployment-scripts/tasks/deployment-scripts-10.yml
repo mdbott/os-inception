@@ -39,6 +39,18 @@
     - templates
     - rebuild
 
+- name: Create the osp10 nossl update script
+  template:
+    src: "templates/nossl-update.sh.j2"
+    dest: /home/{{ stack_user }}/nossl-update.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
 
 - name: Create the osp10 overcloud update script
   template:
@@ -54,10 +66,10 @@
     - rebuild
 
 
-- name: Create the fast forward upgrade script
+- name: Create the fast forward upgrade prepare script
   template:
-    src: "templates/ffwd-to-osp13.sh.j2"
-    dest: /home/{{ stack_user }}/ffwd-to-osp13.sh
+    src: "templates/osp13-ffwd-upgrade-prepare.sh.j2"
+    dest: /home/{{ stack_user }}/osp13-ffwd-upgrade-prepare.sh
     owner: "{{ stack_user }}"
     group: "{{ stack_user }}"
     mode: 0755
@@ -67,28 +79,15 @@
     - templates
     - rebuild
 
-# - name: Create the osp11 upgrade deploy script
-#   template:
-#     src: "templates/deploy-upgrade-osp11.sh.j2"
-#     dest: /home/{{ stack_user }}/deploy-upgrade-osp11.sh
-#     owner: "{{ stack_user }}"
-#     group: "{{ stack_user }}"
-#     mode: 0755
-#   become: true
-#   tags:
-#     - deploy-script
-#     - templates
-#     - rebuild
-#
-# - name: Create the osp11 converge deploy script
-#   template:
-#     src: "templates/deploy-converge-osp11.sh.j2"
-#     dest: /home/{{ stack_user }}/deploy-converge-osp11.sh
-#     owner: "{{ stack_user }}"
-#     group: "{{ stack_user }}"
-#     mode: 0755
-#   become: true
-#   tags:
-#     - deploy-script
-#     - templates
-#     - rebuild
+- name: Create the fast forward upgrade converge script
+  template:
+    src: "templates/osp13-ffwd-upgrade-converge.sh.j2"
+    dest: /home/{{ stack_user }}/osp13-ffwd-upgrade-converge.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild

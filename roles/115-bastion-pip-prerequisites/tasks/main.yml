@@ -1,4 +1,8 @@
 ---
 # tasks file for 115-pip-prerequisites
 - include: remove-conflicting-rpms.yml
+- include: deploy-pip-external.yml
+  when: internet_access|bool == true
+- include: deploy-pip-internal.yml
+  when: internet_access|bool == false
 - include: pip-prerequisites.yml
