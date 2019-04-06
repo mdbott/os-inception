@@ -5,9 +5,8 @@
     state: present
   tasks:
   roles:
+    - role: 215-ospd-load-clouds-yaml
     - role: 210-ospd-inventory-update
-      new_state: "{{ state }}"
-    - role: 100-bastion-inventory-update
       new_state: "{{ state }}"
 
 - name: OpenStack undercloud

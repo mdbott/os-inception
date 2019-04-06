@@ -13,6 +13,13 @@
   tags:
     - clouds-yaml
 
+- name: load clouds.yaml into a ansible variable.
+  set_fact:
+    devcloud_project_id: "{{ hostvars['localhost']['clouds_yaml']['clouds']['lab']['auth']['project_id'] }}"
+  tags:
+    - clouds-yaml
+
+
 - debug:
     var: clouds_yaml
   tags:

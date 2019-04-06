@@ -13,8 +13,7 @@
     filename: "/tmp/{{ item.value.filename }}"
     container_format: "{{ item.value.container_format }}"
     disk_format: "{{ item.value.disk_format }}"
-    properties:
-      os_shutdown_timeout: 30
+    properties: "{{ item.value.properties }}"
   with_dict: "{{ images }}"
   tags:
     - images
@@ -34,6 +33,7 @@
     filename: "/tmp/{{ item.value.filename }}"
     container_format: "{{ item.value.container_format }}"
     disk_format: "{{ item.value.disk_format }}"
+    properties: "{{ item.value.properties }}"
   with_dict: "{{ remote_images }}"
   tags:
     - images

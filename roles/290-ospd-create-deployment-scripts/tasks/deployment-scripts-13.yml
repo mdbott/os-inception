@@ -14,6 +14,34 @@
     - templates
     - rebuild
 
+- name: Create the osp13 no tls deploy script
+  template:
+    src: "templates/deploy-osp13-no-tls.sh.j2"
+    dest: /home/{{ stack_user }}/deploy-osp13-no-tls.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  when: preprovisioned_nodes|bool == false
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
+
+- name: Create the osp13 OVN no tls deploy script
+  template:
+    src: "templates/deploy-osp13-ovn-no-tls.sh.j2"
+    dest: /home/{{ stack_user }}/deploy-osp13-ovn-no-tls.sh
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  when: preprovisioned_nodes|bool == false
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
+
 - name: Create the osp13 basic deploy script
   template:
     src: "templates/deploy-osp13-basic.sh.j2"

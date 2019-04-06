@@ -44,6 +44,22 @@
     - ceph-instances
     - infrastructure
 
+- name: Wait for the ceph instances to become accessable
+  wait_for:
+    port: 22
+    host: "{{ networks['external'].cidr_prefix }}.{{ last_octet[node_type][item.1] }}"
+    search_regex: "OpenSSH"
+    delay: 10
+  with_nested:
+    - "{{ networks['external'].cidr_prefix}}"
+    - "{{ last_octet[node_type] }}"
+  tags:
+    - instances
+    - ceph-instances
+    - ceph-instance-check
+    - infrastructure
+  when: use_existing_ceph == "false" and instances | select('match', '.*ceph.*') | list | length < 3 and new_state=="present"
+
 - name: Ensure {{ node_type }} cinder volumes for project {{ os_project }} are attached
   os_server_volume:
     state: "present"

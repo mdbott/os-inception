@@ -268,7 +268,9 @@ images:
     name: "{{ prefix }}_pxeboot"
     disk_format: raw
     container_format: bare
-
+    properties:
+      hw_rng_model: virtio
+      os_shutdown_timeout: 30
 remote_images:
   rhel-server-7.5-x86_64:
     url: http://repos.example.com/images/rhel-server-7.5-update-3-x86_64-kvm.qcow2
@@ -276,6 +278,8 @@ remote_images:
     name: "{{ os_project }}-rhel-server-7.5-x86_64-kvm"
     disk_format: qcow2
     container_format: bare
+    properties:
+      hw_rng_model: virtio
 # this is commented out as we are not shipping rhel-7.3-35.qcow2 with the playbook.
 # if the file is shipped with the code in the appropriate task's "files" directory
 # this can be uncommented
@@ -315,58 +319,65 @@ flavors:
     ram: 8192
     disk: 20
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
   pacemaker:
     name: "{{ prefix }}.pacemaker"
     vcpus: 2
     ram: 8192
     disk: 40
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
   service:
     name: "{{ prefix }}.service"
     vcpus: 2
     ram: 16384
     disk: 40
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
   compute:
     name: "{{ prefix }}.compute"
     vcpus: 4
     ram: 6144
     disk: 40
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
   ceph:
     name: "{{ prefix }}.ceph"
     vcpus: 2
     ram: 4096
     disk: 20
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
   ospd:
     name: "{{ prefix }}.ospd"
     vcpus: 8
     ram: 16384
     disk: 80
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
 
 flavors_nested:
+  bastion:
+    name: "{{ prefix }}.bastion"
+    vcpus: 2
+    ram: 8192
+    disk: 20
+    ephemeral: 0
+    extra_specs: "hw_rng:allowed=True"
   pacemaker:
     name: "{{ prefix }}.pacemaker"
     vcpus: 2
     ram: 8192
     disk: 20
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
   service:
     name: "{{ prefix }}.service"
     vcpus: 2
     ram: 16384
     disk: 10
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
   compute:
     name: "{{ prefix }}.compute"
     vcpus: 4
@@ -374,6 +385,7 @@ flavors_nested:
     disk: 10
     ephemeral: 0
     extra_specs:
+      "hw_rng:allowed": "True"
       aggregate_instance_extra_specs:
         filter_tenant_id: "{{ os_project_id }}"
   ceph:
@@ -382,14 +394,14 @@ flavors_nested:
     ram: 4096
     disk: 20
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
   ospd:
     name: "{{ prefix }}.ospd"
     vcpus: 4
     ram: 16384
     disk: 80
     ephemeral: 0
-    extra_specs: {}
+    extra_specs: "hw_rng:allowed=True"
 
 # BUG WARNING: using custom security groups with multiple interfaces, some of which are on port_security_disabled networks
 #  can result in boot ERRORS. For this reason, we only use the default security group which seems to work somehow.
@@ -495,8 +507,8 @@ networks:
     dns_nameservers: []
     pool_start: 10
     pool_end:  250
-    inspection_start: 100
-    inspection_end: 120
+    inspection_start: 130
+    inspection_end: 150
     use_existing: "false"
   internalapi:
     name: "{{ prefix }}_internalapi"
@@ -653,8 +665,8 @@ undercloud:
   local_mtu: 1500
   network_cidr: "{{ networks.provisioning.cidr }}"
   masquerade_network: "{{ networks.provisioning.cidr }}"
-  dhcp_start: "{{ networks.provisioning.cidr_prefix }}.5"
-  dhcp_end: "{{ networks.provisioning.cidr_prefix }}.24"
+  dhcp_start: "{{ networks.provisioning.cidr_prefix }}.105"
+  dhcp_end: "{{ networks.provisioning.cidr_prefix }}.124"
   inspection_start: "{{ networks.provisioning.cidr_prefix }}.{{ networks.provisioning.inspection_start }}"
   inspection_end: "{{ networks.provisioning.cidr_prefix }}.{{ networks.provisioning.inspection_end }}"
   undercloud_admin_password: "{{ undercloud_admin_password }}"

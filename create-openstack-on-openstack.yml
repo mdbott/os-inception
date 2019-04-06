@@ -84,6 +84,7 @@
       new_state: "{{ state }}"
     - role: 280-ospd-instack-copy
       new_state: "{{ state }}"
+    - role: 285-maxhammer-run
     - role: 290-ospd-create-deployment-scripts
     - role: 295-ospd-deploy-overcloud-tripleo-artifacts
 
