@@ -6,6 +6,8 @@
     ansible_python_interpreter: "~/.virtualenvs/{{ virtualenv_name }}/bin/python"
   tasks:
   roles:
+    - role: 015-openstack-client
+      new_state: "present"
     - role: 018-keystone-domain-facts
     - role: 022-keystone-project-facts
     - role: 100-bastion-inventory-update
