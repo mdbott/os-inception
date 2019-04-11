@@ -179,7 +179,6 @@ yum_repos:
   - rhel-7-server-openstack-{{ osp_version }}-tools-rpms
   - rhel-7-server-rhceph-3-tools-rpms
   - rhel-7-server-rhceph-3-mon-rpms
-  - rhel-7-server-rhceph-3-osd-rpms
   - rhel-ha-for-rhel-7-server-rpms
 
 bastion_yum_repos:
@@ -194,7 +193,6 @@ bastion_yum_repos:
   - rhel-7-server-openstack-10-tools-rpms
   - rhel-7-server-rhceph-3-tools-rpms
   - rhel-7-server-rhceph-3-mon-rpms
-  - rhel-7-server-rhceph-3-osd-rpms
 
 
 yum_gpgcheck: no
@@ -755,6 +753,7 @@ pip_prerequisites:
   - keystoneauth1==3.9.0
   - ipaddress==1.0.17
   - notario
+  - decorator==4.4.0
 
 
 pip_conflicting_rpms:
