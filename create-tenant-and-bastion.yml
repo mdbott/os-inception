@@ -32,9 +32,9 @@
       new_state: "{{ state }}"
     - role: 045-neutron-subnets
       new_state: "{{ state }}"
-    - role: 050-neutron-router
+    - role: 050-neutron-ports
       new_state: "{{ state }}"
-    - role: 055-neutron-ports
+    - role: 055-neutron-router
       new_state: "{{ state }}"
     - role: 060-disable-portsec
     - role: 065-nova-flavors
