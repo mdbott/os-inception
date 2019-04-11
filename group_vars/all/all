@@ -671,7 +671,12 @@ undercloud:
   # Options are 'none' (no encryption), 'localca', 'ipa'
   undercloud_encryption: none
   use_novajoin: false
-  container_registry: registry.access.redhat.com/rhosp13
+  container_registry: registry.access.redhat.com
+  container_project: rhosp13
+  container_registry_encryption: false
+  container_registry_cacert: |
+    -----BEGIN CERTIFICATE-----
+    -----END CERTIFICATE-----
 
 # undercloud environment variables used for running openstack commands
 # on the undercloud using shell module
