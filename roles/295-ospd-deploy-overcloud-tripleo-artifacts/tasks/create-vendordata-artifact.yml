@@ -6,6 +6,7 @@
   become: true
   tags:
     - deploy-artifacts
+    - deploy-vendordata
     - templates
     - rebuild
 
@@ -19,6 +20,7 @@
   become: true
   tags:
     - deploy-artifacts
+    - deploy-vendordata
     - templates
     - rebuild
 
@@ -32,6 +34,7 @@
   become: true
   tags:
     - deploy-artifacts
+    - deploy-vendordata
     - templates
     - rebuild
 
@@ -42,6 +45,7 @@
   become: true
   tags:
     - deploy-artifacts
+    - deploy-vendordata
     - templates
     - rebuild
 
@@ -50,5 +54,6 @@
     artifacts_filenames: "{{ artifacts_filenames + ['/home/stack/vendordata.tgz'] }}"
   tags:
     - deploy-artifacts
+    - deploy-vendordata
     - templates
     - rebuild

@@ -37,7 +37,7 @@
     mode: 0644
   become: true
   tags:
-    - customise-overcloud-image
+    - overcloud-images
     - undercloud
     - rebuild
 
@@ -47,7 +47,7 @@
     state: present
   become: true
   tags:
-    - customise-overcloud-image
+    - overcloud-images
     - undercloud
     - rebuild
 
@@ -57,7 +57,7 @@
     LIBGUESTFS_BACKEND: direct
   become: true
   tags:
-    - customise-overcloud-image
+    - overcloud-images
     - undercloud
     - rebuild
 

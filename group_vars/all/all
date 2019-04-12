@@ -179,6 +179,7 @@ yum_repos:
   - rhel-7-server-openstack-{{ osp_version }}-tools-rpms
   - rhel-7-server-rhceph-3-tools-rpms
   - rhel-7-server-rhceph-3-mon-rpms
+  - rhel-7-server-rhceph-3-osd-rpms
   - rhel-ha-for-rhel-7-server-rpms
 
 bastion_yum_repos:
@@ -723,7 +724,7 @@ yum_prerequisites:
   - rubygems
   - rubygem-bundler
   - qemu-img
-  - jq
+  - jq-1.5-1.el7
   - vim
   - python-devel
   - sshpass

@@ -2,7 +2,7 @@
 - name: Ensure osp13 undercloud packages and dependencies are present
   yum:
     name: ceph-ansible
-    state: present
+    state: "{{ new_state }}"
   async: "{{ yum_timeout }}"
   poll: "{{ yum_poll }}"
   become: true

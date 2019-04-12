@@ -11,5 +11,6 @@
   with_items:
     - "{{ bastion_yum_repos }}"
   tags:
+    - bastion-yum-repos
     - yum-prereqs
   become: true
