@@ -1,3 +1,4 @@
 ---
 # tasks file for 080-rhn-register
+- include: configure-rabbitmq-selinux.yml
 - include: undercloud-config.yml

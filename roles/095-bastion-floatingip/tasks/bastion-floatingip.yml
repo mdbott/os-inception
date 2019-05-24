@@ -17,7 +17,7 @@
     OS_PROJECT_ID: "{{ devcloud_project_id }}"
     OS_PROJECT_DOMAIN_NAME: "{{ admin_user_domain_name }}"
   tags:
-    - bastion-instance
+    - bastion-floating-ip
 
 # Ported Max's changes to enable floating ips to be removed when cloud is deleted
 - name: Ensure that the floating ip for the bastion is "{{ new_state }}"
@@ -39,4 +39,4 @@
     OS_PROJECT_ID: "{{ devcloud_project_id }}"
     OS_PROJECT_DOMAIN_NAME: "{{ admin_user_domain_name }}"
   tags:
-    - bastion-instance
+    - bastion-floating-ip

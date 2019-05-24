@@ -17,6 +17,8 @@ undercloud_nameservers = {{ novajoin_ipa_ipaddr }}
 overcloud_domain_name = {{ domain_name }}
 {% endif %}
 
+hieradata_override = /home/stack/undercloud-override.yaml
+
 [ctlplane-subnet]
 cidr = {{ undercloud.network_cidr }}
 dhcp_start = {{ undercloud.dhcp_start }}

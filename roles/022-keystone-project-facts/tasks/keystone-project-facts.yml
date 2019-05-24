@@ -8,6 +8,7 @@
   tags:
     - project-facts
     - infrastructure
+    - bastion-deploy
 
 - name: set the project id fact
   set_fact:
@@ -15,6 +16,7 @@
   tags:
     - project-facts
     - infrastructure
+    - bastion-deploy
 
 - debug:
     var: openstack_projects[0]["id"]

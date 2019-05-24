@@ -1,0 +1,48 @@
+---
+- name: Fetch the vendordata project
+  git:
+    repo: "{{ git_repos.vendordata.url }}"
+    version: "{{ git_repos.vendordata.branch }}"
+    dest: /home/stack/vendordata
+    key_file: /home/stack/.ssh/id_rsa.osdev{{ os_project }}
+    accept_hostkey: true
+    force: yes
+  become: yes
+  become_user: stack
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild
+
+- name: Find the openstack-nova-api image version
+  uri:
+    url: "http://{{ networks.provisioning.cidr_prefix }}.1:8787/v2/rhosp13/openstack-nova-api/tags/list"
+  register: nova_image_tag
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild
+
+- name: Update undercloud registry details in Dockerfile
+  replace:
+    path: /home/stack/vendordata/Dockerfile
+    regexp: "^FROM .*$"
+    replace: "FROM {{ networks.provisioning.cidr_prefix }}.1:8787/rhosp13/openstack-nova-api:{{ nova_image_tag.json.tags | last }}"
+  become: yes
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild
+
+- name: Build and push vendordata server container image
+  docker_image:
+    path: /home/stack/vendordata
+    name: "{{ networks.provisioning.cidr_prefix }}.1:8787/funkytown/vendordata"
+    tag: latest
+    push: yes
+  become: yes
+  become_user: stack
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild

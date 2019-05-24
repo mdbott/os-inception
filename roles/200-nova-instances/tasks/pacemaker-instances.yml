@@ -15,9 +15,9 @@
     availability_zone: "{{ instance_az }}"
     nics:
       - port-name: "{{ prefix }}_provisioning_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_external_{{ node_type }}_{{ item }}"
       - port-name: "{{ prefix }}_storage_{{ node_type }}_{{ item }}"
       - port-name: "{{ prefix }}_internalapi_{{ node_type }}_{{ item }}"
-      - port-name: "{{ prefix }}_external_{{ node_type }}_{{ item }}"
     meta:
       group: "{{ node_type }}"
   with_sequence:
@@ -44,9 +44,9 @@
     availability_zone: "{{ instance_az }}"
     nics:
       - port-name: "{{ prefix }}_provisioning_{{ node_type }}_{{ item }}"
+      - port-name: "{{ prefix }}_external_{{ node_type }}_{{ item }}"
       - port-name: "{{ prefix }}_storage_{{ node_type }}_{{ item }}"
       - port-name: "{{ prefix }}_internalapi_{{ node_type }}_{{ item }}"
-      - port-name: "{{ prefix }}_external_{{ node_type }}_{{ item }}"
     meta:
       group: "{{ node_type }}"
   with_sequence:

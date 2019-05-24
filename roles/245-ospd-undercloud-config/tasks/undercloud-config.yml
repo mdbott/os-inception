@@ -1,3 +1,17 @@
+- name: Ensure undercloud override file is {{ new_state }}
+  template:
+    src: undercloud-override.yaml.{{ osp_version }}.j2
+    dest: /home/{{ stack_user }}/undercloud-override.yaml
+    owner: stack
+    group: stack
+    mode: 0644
+  become: true
+  when: osp_version==13
+  tags:
+    - undercloud-config
+    - undercloud
+    - rebuild
+
 - name: Ensure undercloud config is {{ new_state }}
   template:
     src: undercloud.conf.{{ undercloud.undercloud_encryption }}.{{ osp_version }}.j2

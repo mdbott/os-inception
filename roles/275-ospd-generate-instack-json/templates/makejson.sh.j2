@@ -24,7 +24,7 @@ cat << EOF >> /tmp/nodes.json
       "cpu": "2",
       "memory": "32768",
       "disk": "40",
-      "pm_user": "{{ hostvars['localhost']['clouds_yaml']['clouds][os_cluster]['auth']['username'] }}",
+      "pm_user": "{{ hostvars['localhost']['clouds_yaml']['clouds'][os_cluster]['auth']['username'] }}",
       "pm_password": "{{ hostvars['localhost']['clouds_yaml']['clouds'][os_cluster]['auth']['password'] }}",
       "pm_addr": "{{ hostvars['localhost']['clouds_yaml']['clouds'][os_cluster]['auth']['auth_url'] }}/$NODE_NAME",
       "arch": "x86_64",

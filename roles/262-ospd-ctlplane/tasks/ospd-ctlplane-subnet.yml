@@ -1,7 +1,7 @@
 ---
 - name: Get IPA server IP address
   set_fact:
-    ipa_ipaddress: "{{ lookup('dig', clouddata.ipa.server) }}"
+    ipa_ipaddress: "{{ lookup('dig', clouddata.Domains.IPA.url.split('/')[2]) }}"
 
 - name: Get current nameservers for OSPD control plane subnet
   shell: openstack subnet show ctlplane-subnet -c dns_nameservers -f value

@@ -4,6 +4,7 @@ openstack overcloud deploy --templates /usr/share/openstack-tripleo-heat-templat
   -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml \
   -e /usr/share/openstack-tripleo-heat-templates/environments/neutron-ovs-dvr.yaml \
   -e /home/stack/overcloud/network_env_osp13.yaml \
+  -e /home/stack/overcloud/network_ovs.yaml \
   -e /home/stack/overcloud_images.yaml \
   -e /home/stack/overcloud/inject-trust-anchor-hiera-tls-everywhere.yaml \
   -e /home/stack/overcloud/hostnames_ips_osp13.yaml \
@@ -12,10 +13,16 @@ openstack overcloud deploy --templates /usr/share/openstack-tripleo-heat-templat
   -e /home/stack/overcloud/ceph-external.yaml \
   -e /home/stack/overcloud/ipa-ldap-config.yaml \
   -e /home/stack/overcloud/docker-puppet.yaml \
-  -e /home/stack/overcloud/horizon_firewall.yaml \
   -e /usr/share/openstack-tripleo-heat-templates/environments/ssl/enable-internal-tls.yaml \
   -e /usr/share/openstack-tripleo-heat-templates/environments/tls-everywhere-endpoints-dns.yaml \
   -e /home/stack/overcloud/overcloud_env_osp13.yaml \
   -e /usr/share/openstack-tripleo-heat-templates/environments/services/haproxy-public-tls-certmonger.yaml \
+  {% if use_vendordata|bool == true %}
+  -e /home/stack/overcloud/vendordata_env.yaml \
+  {% endif %}
+  {% if use_octavia|bool == true %}
+  -e /usr/share/openstack-tripleo-heat-templates/environments/services-docker/octavia.yaml \
+  -e /home/stack/overcloud/octavia_env.yaml \
+  {% endif %}
   --ntp-server pool.ntp.org --libvirt-type kvm  \
   --log-file overcloud_deployment_0.log

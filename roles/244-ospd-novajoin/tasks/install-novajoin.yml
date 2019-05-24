@@ -10,18 +10,57 @@
     - undercloud
     - rebuild
 
+- name: Ensure undercloud config is {{ new_state }}
+  template:
+    src: novajoin_command.j2
+    dest: /home/{{ stack_user }}/novajoin_command
+    owner: stack
+    group: stack
+    mode: 0644
+  become: true
+  tags:
+    - novajoin-command
+    - novajoin
+    - undercloud-config
+    - undercloud
+    - rebuild
+
 - name: Retrieve IPA one-time-password for ospd enrolment
   shell: >
     /usr/libexec/novajoin-ipa-setup
-    --principal {{ clouddata.ipa.username }}
-    --password {{ clouddata.ipa.password }}
-    --server {{ clouddata.ipa.server }}
-    --realm {{ clouddata.ipa.realm }}
+    --principal admin
+    --password {{ clouddata.Domains.IPA.password }}
+    --server {{ clouddata.Domains.IPA.url.split('/')[2] }}
+    --realm {{ domain_name|upper }}
     --domain {{ domain_name }}
-    --hostname {{ os_project }}-ospd-1.instance.{{ domain_name }}
+    --hostname {{ os_project }}-ospd-1.{{ domain_name }}
+    --otp-file /home/stack/ipaotp
     --precreate
+  args:
+    creates: /home/stack/ipaotp
   become: true
-  register: novajoin_ipa_otp
+  tags:
+    - novajoin
+    - undercloud-config
+    - undercloud
+    - rebuild
+
+
+- name: Load data
+  slurp:
+    src: "/home/stack/ipaotp"
+  register: slurped_ipa_otp
+  become: true
+  tags:
+    - novajoin
+    - undercloud-config
+    - undercloud
+    - rebuild
+
+- name: Load the ipa otp into a variable
+  set_fact:
+    novajoin_ipa_otp: "{{ slurped_ipa_otp.content | b64decode }}"
+  become: true
   tags:
     - novajoin
     - undercloud-config
@@ -30,4 +69,4 @@
 
 - name: Retrieve IPA host IP address for undercloud.conf
   set_fact:
-    novajoin_ipa_ipaddr: "{{ lookup('dig', clouddata.ipa.server) }}"
+    novajoin_ipa_ipaddr: "{{ lookup('dig', clouddata.Domains.IPA.url.split('/')[2]) }}"

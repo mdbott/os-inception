@@ -12,8 +12,7 @@
   when: undercloud.container_registry_encryption|bool == true
   tags:
     - overcloud-containers
-    - undercloud
-    - rebuild
+
 
 - name: deploy docker registry CA cert
   copy:
@@ -27,8 +26,29 @@
   when: undercloud.container_registry_encryption|bool == true
   tags:
     - overcloud-containers
-    - undercloud
-    - rebuild
+
+
+- name: Update the docker config to add the insecure registry
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: 'INSECURE_REGISTRY=.*'
+    line: 'INSECURE_REGISTRY="--insecure-registry={{ networks.provisioning.cidr_prefix }}.1:8787 --insecure-registry={{ undercloud.container_registry }}"'
+  become: true
+  become_user: root
+  when: undercloud.insecure_registry|bool == true
+  tags:
+    - overcloud-containers
+
+
+- name: Shutdown openstack services on the undercloud
+  systemd:
+    state: restarted
+    name: docker
+  become: true
+  become_user: root
+  when: undercloud.insecure_registry|bool == true
+  tags:
+    - overcloud-containers
 
 - name: Prepare the overcloud container registry env file * images file.
   shell: >
@@ -37,30 +57,81 @@
     --push-destination={{ networks.provisioning.cidr_prefix }}.1:8787
     --prefix=openstack-  --tag-from-label {version}-{release}
     -e /usr/share/openstack-tripleo-heat-templates/environments/services-docker/neutron-ovn-dvr-ha.yaml
+    -e /usr/share/openstack-tripleo-heat-templates/environments/services-docker/octavia.yaml
+    -e /usr/share/openstack-tripleo-heat-templates/environments/services/barbican.yaml
+    -e /usr/share/openstack-tripleo-heat-templates/environments/barbican-backend-simple-crypto.yaml
     --output-env-file=/home/stack/overcloud_images.yaml
-    --output-images-file /home/stack/local_registry_images.yaml
+    --output-images-file /home/stack/local_registry_images.yaml &>
+    /home/stack/overcloud_container_prepare.log
   environment: "{{ undercloud_auth_env_v3 }}"
   args:
     chdir: /home/stack/images/
   become: yes
   become_user: stack
-  poll: 10
   tags:
     - overcloud-containers
     - undercloud
     - rebuild
 
+# # # # #
+# The container image upload can take a long time to complete.
+# The next few tasks check whether or not we can skip this upload.
+- name: Load required container image list into Ansible facts
+  slurp:
+    src: /home/stack/local_registry_images.yaml
+  become: yes
+  register: local_registry_images_b64
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild
+
+- name: Decode list of local registry images
+  set_fact:
+    local_registry_images: "{{ local_registry_images_b64.content | b64decode | from_yaml }}"
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild
+
+- name: Get a list of already-uploaded containers
+  uri:
+    url: http://{{ networks.provisioning.cidr_prefix }}.1:8787/v2/_catalog
+  register: registry_result
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild
+
+- set_fact:
+    upload_images: false
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild
+
+- set_fact:
+    upload_images: true
+  when: item.split(':')[0].split('/')[1:] | join('/') not in registry_result.json.repositories
+  with_items: "{{ local_registry_images.container_images | json_query('[*].imagename') }}"
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild
+# # # # #
+
 - name: Upload the overcloud containers into the undercloud registry
   shell: >
     openstack overcloud container image upload
     --config-file  /home/stack/local_registry_images.yaml
-    --verbose
+    --verbose &>
+    /home/stack/overcloud_container_upload.log
   environment: "{{ undercloud_auth_env_v3 }}"
   args:
     chdir: /home/stack/images/
   become: yes
   become_user: root
-  poll: 10
+  when: upload_images
   tags:
     - overcloud-containers
     - undercloud

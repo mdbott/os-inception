@@ -11,7 +11,7 @@ clouds:
       project_domain_name: {{ admin_project_domain_name }}
     identity_api_version: {{ identity_api_version }}
     compute_api_version: {{ compute_api_version }}
-    region_name: regionOne
+    region_name: {{ os_region }}
     interface: {{ endpoint_type }}
 {% endif %}
     cacert: {{ cacertfile }}

@@ -1,0 +1,44 @@
+---
+
+- name: Install selinux policy tools
+  yum:
+    pkg: policycoreutils-python
+    state: installed
+  become: true
+  tags:
+    - undercloud-config
+
+- name: Copy selinux type enforcement file
+  copy:
+    src: hipe.te
+    dest: /tmp/
+  tags:
+    - undercloud-config
+
+- name: Compile selinux module file
+  command: checkmodule -M -m -o /tmp/hipe.mod /tmp/hipe.te
+  become: true
+  tags:
+    - undercloud-config
+
+- name: Build selinux policy package
+  command: semodule_package -o /tmp/hipe.pp -m /tmp/hipe.mod
+  become: true
+  tags:
+    - undercloud-config
+
+- name: Load selinux policy package
+  command: semodule -i /tmp/hipe.pp
+  become: true
+  tags:
+    - undercloud-config
+
+# - name: Set the nis_enabled selinux boolean to true for the rabbitmqadmin plugin
+#   command: setsebool -P nis_enabled 1
+#   tags:
+#     - undercloud-config
+#
+# - name: Install the rabbitmqadmin plugin
+#   command: rabbitmq-plugins enable rabbitmq_management
+#   tags:
+#     - undercloud-config

@@ -17,7 +17,7 @@
   async: 1
   poll: 0
   become: true
-  when: "'{{nova_status_result.stdout_lines | last}}' == 'ActiveState=inactive'"
+  when: nova_status_result.stdout_lines | last == "ActiveState=inactive"
   tags:
     - undercloud-install
     - undercloud
@@ -30,7 +30,7 @@
     search_regex: "OpenSSH"
     delay: 10
   delegate_to: localhost
-  when: "'{{nova_status_result.stdout_lines | last}}' == 'ActiveState=inactive'"
+  when: nova_status_result.stdout_lines | last == "ActiveState=inactive"
   tags:
     - undercloud-install
     - undercloud
@@ -43,7 +43,7 @@
     /home/stack/undercloud_install.log
   become: yes
   become_user: stack
-  when: "'{{nova_status_result.stdout_lines | last}}' == 'ActiveState=inactive'"
+  when: nova_status_result.stdout_lines | last == "ActiveState=inactive"
   async: 3600
   poll: 20
   tags:

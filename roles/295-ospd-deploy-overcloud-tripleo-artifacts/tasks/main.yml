@@ -2,6 +2,7 @@
 # tasks file for 295-ospd-deploy-overcloud-tripleo-artifacts
 - include_tasks: create-puppet-modules-artifacts.yml
   when: osp_version==10
-- include_tasks: create-vendordata-artifact.yml
-  when: osp_version==13
+# Removing vendordata artifact - now deployed as a containerised service
+# - include_tasks: create-vendordata-artifact.yml
+#   when: osp_version==13
 - include_tasks: upload-tripleo-artifacts.yml

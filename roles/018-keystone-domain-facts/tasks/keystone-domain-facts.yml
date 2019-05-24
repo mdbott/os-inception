@@ -8,6 +8,7 @@
   tags:
     - domain-facts
     - infrastructure
+    - bastion-deploy
 
 - name: set the user domain id fact
   set_fact:
@@ -15,6 +16,7 @@
   tags:
     - domain-facts
     - infrastructure
+    - bastion-deploy
 
 - debug:
     var: openstack_domains[0]["id"]

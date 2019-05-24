@@ -1,0 +1,30 @@
+# increased timeouts
+tripleo::haproxy::haproxy_default_timeout: [ 'http-request 10s', 'queue 3m', 'connect 10s', 'client 5m', 'server 5m', 'check 10s' ]
+heat::rpc_response_timeout: 1200
+nova::rpc_response_timeout: 1200
+ironic::rpc_response_timeout: 1200
+
+# memcached
+glance::api::authtoken::memcached_servers: "127.0.0.1:11211"
+heat::keystone::authtoken::memcached_servers: "127.0.0.1:11211"
+heat::cache::memcache_servers: "127.0.0.1:11211"
+ironic::api::authtoken::memcached_servers: "127.0.0.1:11211"
+ironic::inspector::authtoken::memcached_servers: "127.0.0.1:11211"
+keystone::cache_memcache_servers: "127.0.0.1:11211"
+mistral::keystone::authtoken::memcached_servers: "127.0.0.1:11211"
+neutron::keystone::authtoken::memcached_servers: "127.0.0.1:11211"
+nova::keystone::authtoken::memcached_servers: "127.0.0.1:11211"
+nova::cache::memcache_servers: "127.0.0.1:11211"
+nova::keystone::authtoken::memcached_servers: "127.0.0.1:11211"
+swift::proxy::authtoken::memcache_servers: "127.0.0.1:11211"
+swift::proxy::cache::memcache_servers: "127.0.0.1:11211"
+zaqar::keystone::authtoken::memcached_servers: "127.0.0.1:11211"
+swift::objectexpirer::memcached_servers: "127.0.0.1:11211"
+
+# rabbitmq
+rabbitmq::config_variables:
+  hipe_compile: true
+
+# db sync timeouts
+nova::db::sync::db_sync_timeout: 2000
+neutron::db::sync::db_sync_timeout: 2000

@@ -3,13 +3,16 @@ local_ip = {{ undercloud.local_ip }}
 local_interface = {{ undercloud.local_interface }}
 local_mtu = {{ undercloud.local_mtu }}
 enable_tempest = true
+
 undercloud_hostname = {{ os_project }}-ospd-1.{{ domain_name }}
 {% if undercloud.use_novajoin|bool %}
 enable_novajoin = true
-ipa_otp = {{ novajoin_ipa_otp.stdout }}
+ipa_otp = {{ novajoin_ipa_otp }}
 undercloud_nameservers = {{ novajoin_ipa_ipaddr }}
 overcloud_domain_name = {{ domain_name }}
 {% endif %}
+
+hieradata_override = /home/stack/undercloud-override.yaml
 
 [ctlplane-subnet]
 cidr = {{ undercloud.network_cidr }}

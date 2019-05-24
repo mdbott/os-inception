@@ -13,21 +13,20 @@
     OS_PROJECT_ID: "{{ devcloud_project_id }}"
     OS_PROJECT_DOMAIN_NAME: "{{ admin_user_domain_name }}"
   tags:
-    - bastion-instance
     - bastion-inventory
+    - bastion-deploy
 
 - debug:
     var: openstack_servers[0].interface_ip
   tags:
-    - bastion-instance
     - bastion-facts
 
 - name: set the bastion_float fact
   set_fact:
     bastion_float: "{{ openstack_servers[0].interface_ip }}"
   tags:
-    - bastion-instance
     - bastion-inventory
+    - bastion-deploy
 
 - name: Ensure ssh confguration is present
   blockinfile:
@@ -53,8 +52,8 @@
         IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
   become: false
   tags:
-    - bastion-instance
     - bastion-inventory
+    - bastion-deploy
 
 - name: Update /etc/hosts with bastion nodes
   lineinfile:
@@ -65,7 +64,7 @@
   become: true
   tags:
     - bastion-inventory
-    - bastion-instance
+    - bastion-deploy
 
 - name: Ensure the bastion instance is {{ new_state }} in the bastion group
   add_host:
@@ -77,8 +76,8 @@
     groups:
       - bastion
   tags:
-    - bastion-instance
     - bastion-inventory
+    - bastion-deploy
 
 - name: Wait for the bastion instance to become accessable
   wait_for:
@@ -87,6 +86,6 @@
     search_regex: "OpenSSH"
     delay: 10
   tags:
-    - bastion-instance
     - bastion-inventory
+    - bastion-deploy
   when: new_state=='present'

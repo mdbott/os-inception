@@ -7,6 +7,7 @@
     force: yes
     groups:
       - wheel
+    append: true
   become: true
   tags:
     - stack-user

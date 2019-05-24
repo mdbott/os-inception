@@ -1,0 +1,13 @@
+
+module hipe 1.1;
+
+require {
+	type rabbitmq_t;
+    type cert_t;
+    class process execmem;
+    class file write;
+}
+
+#============= rabbitmq_t ==============
+allow rabbitmq_t self:process execmem;
+allow rabbitmq_t cert_t:file write;
