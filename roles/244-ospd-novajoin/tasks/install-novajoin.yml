@@ -16,7 +16,7 @@
     dest: /home/{{ stack_user }}/novajoin_command
     owner: stack
     group: stack
-    mode: 0644
+    mode: 0755
   become: true
   tags:
     - novajoin-command
@@ -27,15 +27,7 @@
 
 - name: Retrieve IPA one-time-password for ospd enrolment
   shell: >
-    /usr/libexec/novajoin-ipa-setup
-    --principal admin
-    --password {{ clouddata.Domains.IPA.password }}
-    --server {{ clouddata.Domains.IPA.url.split('/')[2] }}
-    --realm {{ domain_name|upper }}
-    --domain {{ domain_name }}
-    --hostname {{ os_project }}-ospd-1.{{ domain_name }}
-    --otp-file /home/stack/ipaotp
-    --precreate
+    /home/{{ stack_user }}/novajoin_command
   args:
     creates: /home/stack/ipaotp
   become: true
