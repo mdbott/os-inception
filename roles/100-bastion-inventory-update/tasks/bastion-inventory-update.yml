@@ -40,11 +40,6 @@
         StrictHostKeyChecking no
         UserKnownHostsFile=/dev/null
         IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
-      Host {{ prefix }}-{{ node_type }}.{{ domain_name }}
-        User {{ bastion_user }}
-        StrictHostKeyChecking no
-        UserKnownHostsFile=/dev/null
-        IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
       Host {{ prefix }}-{{ node_type }}
         User {{ bastion_user }}
         StrictHostKeyChecking no
@@ -59,7 +54,7 @@
   lineinfile:
     dest: /etc/hosts
     regexp: '{{ bastion_float }}.*'
-    line: '{{ bastion_float }} {{ prefix }}-{{ node_type }}.{{ domain_name }} {{ prefix }}-{{ node_type }}'
+    line: '{{ bastion_float }} {{ prefix }}-{{ node_type }}'
     state: "{{ new_state }}"
   become: true
   tags:

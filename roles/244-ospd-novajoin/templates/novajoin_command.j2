@@ -1,9 +1,11 @@
+#!/bin/bash
+
 /usr/libexec/novajoin-ipa-setup \
 --principal {{ clouddata.Domains.IPA.user | regex_replace('^(uid=)([-a-zA-Z]*)(,.*)$', '\\2')  }} \
 --password "{{ clouddata.Domains.IPA.password }}" \
 --server {{ clouddata.Domains.IPA.url.split('/')[2] }} \
---realm {{ domain_name|upper }} \
---domain {{ domain_name }} \
---hostname {{ os_project }}-ospd-1.{{ domain_name }} \
+--realm {{ clouddata.domain|upper }} \
+--domain {{ clouddata.domain }} \
+--hostname {{ os_project }}-ospd-1.{{ clouddata.domain }} \
 --otp-file /home/stack/ipaotp \
 --precreate

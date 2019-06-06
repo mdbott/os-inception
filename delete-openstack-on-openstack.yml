@@ -18,6 +18,9 @@
     state: present
   tasks:
   roles:
+    - role: 018-keystone-domain-facts
+    - role: 022-keystone-project-facts
+    - role: 160-bastion-load-clouddata
     - role: 210-ospd-inventory-update
       new_state: "{{ state }}"
 

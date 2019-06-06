@@ -3,7 +3,7 @@
 - name: Get the current list of projects that can access nest virt resources.
   shell:  "openstack --os-cloud {{ os_cluster_admincreds }} aggregate show {{ inception_host_aggregate }} -c properties -f json| jq -r 'def stripquotes: explode | map(select(39!=.)) | implode; .properties| split(\"=\")[1]|stripquotes |split(\",\") '"
   register: aggregate_projects
-  when: create_project==true 
+  when: create_project==true
   tags:
     - nested
     - infrastructure
@@ -28,14 +28,14 @@
     - infrastructure
 
 - debug:
-    msg: 'filter_tenant_id: {{ authorised_projects|join(",")+","+os_project_id.stdout }}'
+    msg: 'filter_tenant_id: {{ authorised_projects|join(",")+","+devcloud_project_id }}'
   when: new_state=='present'
   tags:
     - nested
     - infrastructure
 
 - debug:
-    msg: 'filter_tenant_id: {{ authorised_projects|difference([os_project_id.stdout])|join(",") }}'
+    msg: 'filter_tenant_id: {{ authorised_projects|difference([devcloud_project_id])|join(",") }}'
   when: new_state=='absent'
   tags:
     - nested
@@ -47,9 +47,9 @@
     cacert: "{{ cacertfile }}"
     name: "{{ inception_host_aggregate }}"
     metadata:
-      filter_tenant_id: '{{ authorised_projects|join(",")+","+os_project_id.stdout }}'
+      filter_tenant_id: '{{ authorised_projects|join(",")+","+ devcloud_project_id }}'
     state: "{{ new_state }}"
-  when: "new_state=='present' and create_project==true and {{ os_project_id.stdout not in authorised_projects }}"
+  when: "new_state=='present' and create_project==true and {{ devcloud_project_id not in authorised_projects }}"
   tags:
     - nested
     - infrastructure
@@ -60,8 +60,8 @@
     cacert: "{{ cacertfile }}"
     name: "{{ inception_host_aggregate }}"
     metadata:
-      filter_tenant_id: '{{ authorised_projects|difference([os_project_id.stdout])|join(",") }}'
-  when: "new_state=='absent' and create_project==true and {{ os_project_id.stdout in authorised_projects }}"
+      filter_tenant_id: '{{ authorised_projects|difference([devcloud_project_id])|join(",") }}'
+  when: "new_state=='absent' and create_project==true and {{ devcloud_project_id in authorised_projects }}"
   tags:
     - nested
     - infrastructure

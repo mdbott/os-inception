@@ -4,13 +4,13 @@
   shell: "openstack --os-cloud {{ os_cluster }} server list -c Name -f value"
   register: result
   tags:
-    - instances
+    - always
 
 - name: set the instance_network fact
   set_fact:
     instances: "{{ result.stdout_lines }}"
   tags:
-   - instances
+   - always
 
 - name: Dump all
   debug:

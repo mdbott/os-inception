@@ -1,0 +1,31 @@
+---
+
+- name: Update /etc/hosts with overcloud public vip
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '{{ clouddata.vips.public_api }}'
+    line: '{{ clouddata.vips.public_api }} {{ clouddata.fqdn }}'
+    state: present
+  become: true
+  tags:
+    - host-update
+
+- name: Update /etc/hosts with overcloud internalapi vip
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '{{ clouddata.vips.internal_api }}'
+    line: '{{ clouddata.vips.internal_api }} {{ clouddata.domain_prefix }}.internalapi.{{ clouddata.domain }}'
+    state: present
+  become: true
+  tags:
+    - host-update
+
+- name: Update /etc/hosts with overcloud storage vip
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '{{ clouddata.vips.storage }}'
+    line: '{{ clouddata.vips.storage }} {{ clouddata.domain_prefix }}.storage.{{ clouddata.domain }}'
+    state: present
+  become: true
+  tags:
+    - host-update

@@ -1,4 +1,4 @@
 ---
 # tasks file for ospd-novajoin
-- include_tasks: install-novajoin.yml
+- include: install-novajoin.yml
   when: osp_version==13

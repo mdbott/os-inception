@@ -12,9 +12,9 @@ certificate_generation_ca = local
 {% if undercloud.use_novajoin|bool %}
 enable_novajoin = true
 ipa_otp = {{ novajoin_ipa_otp.stdout }}
-undercloud_hostname = {{ os_project }}-ospd-1.instance.{{ domain_name }}
+undercloud_hostname = {{ os_project }}-ospd-1.instance.{{ clouddata.domain }}
 undercloud_nameservers = {{ novajoin_ipa_ipaddr }}
-overcloud_domain_name = {{ domain_name }}
+overcloud_domain_name = {{ clouddata.domain }}
 {% endif %}
 
 hieradata_override = /home/stack/undercloud-override.yaml

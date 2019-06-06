@@ -14,6 +14,7 @@
   tasks:
   roles:
     - role: 007-set-running-user
+    - role: 160-bastion-load-clouddata
     - role: 210-ospd-inventory-update
       new_state: "{{ state }}"
 

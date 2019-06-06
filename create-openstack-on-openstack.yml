@@ -17,6 +17,7 @@
     - role: 007-set-running-user
     - role: 018-keystone-domain-facts
     - role: 022-keystone-project-facts
+    - role: 160-bastion-load-clouddata
     - role: 200-nova-instances
       new_state: "{{ state }}"
       when: preprovisioned_nodes|bool == false
@@ -31,7 +32,6 @@
       new_state: "{{ state }}"
       access_user: "{{ bastion_user }}"
       access_user_group: "{{ bastion_user_group }}"
-    - role: 160-bastion-load-clouddata
     - role: 215-ospd-load-clouds-yaml
 
 ##################################################
