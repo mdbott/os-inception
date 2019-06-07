@@ -12,5 +12,5 @@ openstack overcloud deploy --templates /usr/share/openstack-tripleo-heat-templat
   -e /home/stack/overcloud/ceph-external.yaml \
   -e /home/stack/overcloud/docker-puppet.yaml \
   -e /home/stack/overcloud/overcloud_env_osp13.yaml \
-  --ntp-server pool.ntp.org --libvirt-type kvm   \
+  --ntp-server  {{ clouddata.ntpservers[0] }} --libvirt-type kvm   \
   --log-file overcloud_deployment_0.log
