@@ -23,7 +23,7 @@
       group: "{{ node_type }}"
   with_sequence:
     count="{{nodes[node_type].count}}"
-  when: instances | select('match', '.*compute.*') | list | length < 2 and new_state=="present"
+  when: instances | select('match', '.*compute.*') | list | length < nodes.compute.count and new_state=="present"
   tags:
     - instances
     - compute-instances

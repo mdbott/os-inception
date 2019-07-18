@@ -1,0 +1,164 @@
+---
+
+
+- name: Ensure overcloud nodes are absent in IPA
+  ipa_host:
+    name: "{{ prefix }}-{{ item }}.{{ clouddata.domain }}"
+    description: "{{ prefix }} undercloud vip"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  with_items:
+    - compute20
+    - compute21
+    - pacemaker11
+    - pacemaker12
+    - pacemaker13
+    - service14
+    - service15
+    - service16
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud internalapi nodes are absent in IPA
+  ipa_host:
+    name: "{{ prefix }}-{{ item }}.internalapi.{{ clouddata.domain }}"
+    description: "{{ prefix }} undercloud vip"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  with_items:
+    - compute20
+    - compute21
+    - pacemaker11
+    - pacemaker12
+    - pacemaker13
+    - service14
+    - service15
+    - service16
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud ctlplane nodes are absent in IPA
+  ipa_host:
+    name: "{{ prefix }}-{{ item }}.ctlplane.{{ clouddata.domain }}"
+    description: "{{ prefix }} undercloud vip"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  with_items:
+    - compute20
+    - compute21
+    - pacemaker11
+    - pacemaker12
+    - pacemaker13
+    - service14
+    - service15
+    - service16
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud storage nodes are absent in IPA
+  ipa_host:
+    name: "{{ prefix }}-{{ item }}.storage.{{ clouddata.domain }}"
+    description: "{{ prefix }} undercloud vip"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  with_items:
+    - compute20
+    - compute21
+    - pacemaker11
+    - pacemaker12
+    - pacemaker13
+    - service14
+    - service15
+    - service16
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud storagemgmt nodes are absent in IPA
+  ipa_host:
+    name: "{{ prefix }}-{{ item }}.storagemgmt.{{ clouddata.domain }}"
+    description: "{{ prefix }} undercloud vip"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  with_items:
+    - compute20
+    - compute21
+    - pacemaker11
+    - pacemaker12
+    - pacemaker13
+    - service14
+    - service15
+    - service16
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud external nodes are absent in IPA
+  ipa_host:
+    name: "{{ prefix }}-{{ item }}.external.{{ clouddata.domain }}"
+    description: "{{ prefix }} undercloud vip"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  with_items:
+    - compute20
+    - compute21
+    - pacemaker11
+    - pacemaker12
+    - pacemaker13
+    - service14
+    - service15
+    - service16
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup

@@ -3,6 +3,7 @@
   yum:
     name: "{{ satellite_pkg }}"
     state: "{{ new_state }}"
+  become: true
   tags:
     - sub-man
     - undercloud
@@ -13,7 +14,12 @@
     activationkey: "{{ activation_key }}"
     org_id: "{{ satellite_org }}"
     rhsm_baseurl: "{{ satellite_url }}"
+  become: true
   tags:
     - sub-man
     - undercloud
     - rebuild
+
+- name: Reinstall Satellite Certs after subscription
+  shell: "/usr/bin/yum reinstall -e 0 -y {{ satellite_pkg }}"
+  become: true

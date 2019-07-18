@@ -3,6 +3,7 @@
 - name: Get the clouds.yaml from the bastion
   slurp:
     path: "/home/{{ bastion_user }}/.config/openstack/clouds.yaml"
+  no_log: true
   register: encoded_clouds_yaml
   tags:
     - clouds-yaml
@@ -10,17 +11,12 @@
 - name: load clouds.yaml into a ansible variable.
   set_fact:
     clouds_yaml: "{{ encoded_clouds_yaml.content|b64decode| from_yaml }}"
+  no_log: true
   tags:
     - clouds-yaml
 
 - name: load clouds.yaml into a ansible variable.
   set_fact:
     devcloud_project_id: "{{ hostvars['localhost']['clouds_yaml']['clouds'][os_cluster]['auth']['project_id'] }}"
-  tags:
-    - clouds-yaml
-
-
-- debug:
-    var: clouds_yaml
   tags:
     - clouds-yaml

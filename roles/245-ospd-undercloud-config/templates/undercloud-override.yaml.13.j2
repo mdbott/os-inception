@@ -28,3 +28,8 @@ rabbitmq::config_variables:
 # db sync timeouts
 nova::db::sync::db_sync_timeout: 2000
 neutron::db::sync::db_sync_timeout: 2000
+{% if undercloud.undercloud_encryption == 'ipa' %}
+
+# keepalived workaround for br-ctlplane interface for public VIP
+keepalived::static_ipaddress: [ "{{ undercloud.undercloud_public_vip }} dev br-ctlplane" ]
+{% endif %}

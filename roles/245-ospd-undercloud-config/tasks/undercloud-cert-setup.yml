@@ -1,0 +1,48 @@
+---
+
+
+- name: Ensure ospd vip host dns entry is present in IPA
+  ipa_dnsrecord:
+    name: "{{ prefix }}-ospd-1-vip"
+    zone_name: "{{ clouddata.domain }}"
+    record_type: 'A'
+    record_value: "{{ undercloud.undercloud_public_vip }}"
+    state: present
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  tags:
+    - undercloud-config
+    - undercloud-cert
+    - rebuild
+
+- name: Ensure ospd vip host is present in IPA
+  ipa_host:
+    name: "{{ prefix }}-ospd-1-vip.{{ clouddata.domain }}"
+    description: "{{ prefix }} undercloud vip"
+    state: present
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  tags:
+    - undercloud-config
+    - undercloud-cert
+    - rebuild
+
+- name: Ensure ospd vip haproxy service is present in IPA
+  ipa_service:
+    name: "haproxy/{{ prefix }}-ospd-1-vip.{{ clouddata.domain }}"
+    hosts:
+      - "{{ prefix }}-ospd-1-vip.{{ clouddata.domain }}"
+      - "{{ prefix }}-ospd-1.{{ clouddata.domain }}"
+    state: present
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  tags:
+    - undercloud-config
+    - undercloud-cert
+    - rebuild

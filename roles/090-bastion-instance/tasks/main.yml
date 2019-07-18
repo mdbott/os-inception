@@ -1,3 +1,4 @@
 ---
+- include: instance-check.yml
 - include: bastion-instance.yml
   node_type: bastion

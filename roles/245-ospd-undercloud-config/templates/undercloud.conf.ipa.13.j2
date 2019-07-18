@@ -1,0 +1,33 @@
+[DEFAULT]
+local_ip = {{ undercloud.local_ip }}
+local_interface = {{ undercloud.local_interface }}
+local_mtu = {{ undercloud.local_mtu }}
+enable_tempest = true
+
+undercloud_hostname = {{ os_project }}-ospd-1.{{ clouddata.domain }}
+{% if undercloud.use_novajoin|bool %}
+enable_novajoin = true
+ipa_otp = {{ novajoin_ipa_otp }}
+service_principal = haproxy/{{ os_project }}-ospd-1-vip.{{ clouddata.domain }}
+undercloud_public_host = {{ os_project }}-ospd-1-vip.{{ clouddata.domain }}
+undercloud_admin_vip = {{ undercloud.undercloud_admin_vip }}
+
+certificate_generation_ca = IPA
+generate_service_certificate = true
+
+undercloud_nameservers = {{ clouddata.dnsservers[0] }}
+overcloud_domain_name = {{ clouddata.domain }}
+{% endif %}
+
+hieradata_override = /home/stack/undercloud-override.yaml
+
+[ctlplane-subnet]
+cidr = {{ undercloud.network_cidr }}
+dhcp_start = {{ undercloud.dhcp_start }}
+dhcp_end = {{ undercloud.dhcp_end }}
+inspection_iprange = {{ undercloud.inspection_start }},{{ undercloud.inspection_end }}
+gateway = {{ undercloud.network_gateway }}
+masquerade = true
+
+[auth]
+undercloud_admin_password = {{ undercloud.undercloud_admin_password }}

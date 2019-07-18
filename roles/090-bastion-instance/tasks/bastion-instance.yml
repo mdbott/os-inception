@@ -31,7 +31,7 @@
   tags:
     - bastion-instance
     - infrastructure
-  when: cloud_access=="private"
+  when: cloud_access=="private" and instances | select('match', '.*bastion.*') | list | length < nodes.bastion.count
 
 - name: Ensure the bastion instance for project {{ os_project }} is "{{ new_state }}"
   os_server:
@@ -67,4 +67,4 @@
   tags:
     - bastion-instance
     - infrastructure
-  when: cloud_access=="public"
+  when: cloud_access=="public" and instances | select('match', '.*bastion.*') | list | length < nodes.bastion.count

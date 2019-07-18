@@ -22,7 +22,7 @@
       group: "{{ node_type }}"
   with_sequence:
     count="{{nodes[node_type].count}}"
-  when: instances | select('match', '.*pacemaker.*') | list | length < 3 and new_state=="present"
+  when: instances | select('match', '.*pacemaker.*') | list | length < nodes.pacemaker.count and new_state=="present"
   tags:
     - instances
     - pacemaker-instances

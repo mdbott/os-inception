@@ -1,0 +1,7 @@
+---
+# vars file for roles/550-ipa-entry-cleanup
+
+#IPAserver: "{{ clouddata.Domains.IPA.url | regex_replace('^ldaps://','')  }}"
+IPAserver: "{{ clouddata.Domains.IPA.url.split('/')[2] }}"
+IPAusername: "{{  clouddata.Domains.IPA.user | regex_replace('^(uid=)([-a-zA-Z]*)(,.*)$', '\\2')  }}"
+IPApassword: "{{ clouddata.Domains.IPA.password  }}"

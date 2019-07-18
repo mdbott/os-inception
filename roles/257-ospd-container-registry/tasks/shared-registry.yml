@@ -1,0 +1,24 @@
+---
+- name: Prepare overcloud container image list for shared registry
+  shell: >
+    openstack overcloud container image prepare
+    --namespace={{ undercloud.container_registry }}/{{ undercloud.container_project }}
+    --set ceph_namespace={{  undercloud.container_registry }}/rhceph
+    --set ceph_image=rhceph-3-rhel7
+    --set ceph_tag=latest
+    --prefix=openstack-  --tag-from-label {version}-{release}
+    -e /usr/share/openstack-tripleo-heat-templates/environments/services-docker/neutron-ovn-dvr-ha.yaml
+    -e /usr/share/openstack-tripleo-heat-templates/environments/services-docker/octavia.yaml
+    -e /usr/share/openstack-tripleo-heat-templates/environments/services/barbican.yaml
+    -e /usr/share/openstack-tripleo-heat-templates/environments/barbican-backend-simple-crypto.yaml
+    --output-env-file=/home/stack/overcloud_images.yaml &>
+    /home/stack/overcloud_container_prepare.log
+  environment: "{{ undercloud_auth_env_v3 }}"
+  args:
+    chdir: /home/stack/images/
+  become: yes
+  become_user: stack
+  tags:
+    - overcloud-containers
+    - undercloud
+    - rebuild

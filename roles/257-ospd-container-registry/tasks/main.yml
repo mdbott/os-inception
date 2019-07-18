@@ -1,0 +1,15 @@
+---
+- include: secure-registry.yml
+  when: osp_version==13
+
+# if using a shared registry as a source
+- include: shared-registry.yml
+  when:
+    - osp_version==13
+    - undercloud.deploy_undercloud_registry|bool == false
+
+# if deploying a new local undercloud registry as a source
+- include: undercloud-registry.yml
+  when:
+    - osp_version==13
+    - undercloud.deploy_undercloud_registry|bool == true

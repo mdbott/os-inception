@@ -1,14 +1,4 @@
-- name: Ensure foremanapi git repo checkout is present
-  git:
-    repo: "{{ git_repos.foreman }}"
-    dest: "/home/{{ bastion_user }}/foreman"
-    accept_hostkey: true
-  tags:
-    - git-clone
-    - foreman-git
-    - foreman
-    - templates
-
+---
 
 - name: Ensure ceph-ansible git repo checkout is present
   git:
@@ -16,8 +6,10 @@
     version: "{{ git_repos.ceph_ansible.branch }}"
     dest: "/home/{{ bastion_user }}/ceph-ansible"
     accept_hostkey: true
+  ignore_errors: true
   tags:
     - git-clone
+    - maxhammer
     - templates
 
 - name: Ensure os-inception git repo checkout is present
@@ -26,34 +18,8 @@
     version: "{{ git_repos.os_inception.branch }}"
     dest: "/home/{{ bastion_user }}/os-inception"
     accept_hostkey: true
+  ignore_errors: true
   tags:
     - git-clone
-    - templates
-
-- name: Set up foremanapi
-  shell: "python setup.py sdist"
-  args:
-    chdir: "/home/{{ bastion_user }}/foreman"
-  tags:
-    - foreman-setup
-    - foreman
-    - templates
-
-
-- name: Install foremanapi
-  shell: "pip install /home/{{ bastion_user }}/foreman/dist/foremanapi-*.tar.gz"
-  become: true
-  tags:
-    - foreman-install
-    - foreman
-    - templates
-
-
-- name: install ipaddress python module
-  pip:
-   name: ipaddress
-   version: 1.0.17
-   state: present
-  become: true
-  tags:
+    - maxhammer
     - templates

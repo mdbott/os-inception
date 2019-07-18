@@ -1,6 +1,7 @@
 ---
 # tasks file for os-on-os
 - include: instance-check.yml
+- include: volume-check.yml
 - include: ospd-instance.yml
   node_type: ospd
 - include: pacemaker-instances.yml

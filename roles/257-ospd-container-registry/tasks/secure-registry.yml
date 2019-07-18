@@ -1,0 +1,47 @@
+---
+- name: create docker registry cacert directory
+  file:
+    dest: "/etc/docker/certs.d/{{ undercloud.container_registry }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+  become_user: root
+  when: undercloud.container_registry_encryption|bool == true
+  tags:
+    - overcloud-containers
+
+- name: deploy docker registry CA cert
+  copy:
+    dest: "/etc/docker/certs.d/{{ undercloud.container_registry }}/ca.crt"
+    content: "{{ undercloud.container_registry_cacert }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  become_user: root
+  when: undercloud.container_registry_encryption|bool == true
+  tags:
+    - overcloud-containers
+
+- name: Update the docker config to add the insecure registry
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: 'INSECURE_REGISTRY=.*'
+    line: 'INSECURE_REGISTRY="--insecure-registry={{ networks.provisioning.cidr_prefix }}.1:8787 --insecure-registry={{ undercloud.container_registry }}"'
+  become: true
+  become_user: root
+  when: undercloud.insecure_registry|bool == true
+  tags:
+    - overcloud-containers
+
+- name: Shutdown openstack services on the undercloud
+  systemd:
+    state: restarted
+    name: docker
+  become: true
+  become_user: root
+  when: undercloud.insecure_registry|bool == true
+  tags:
+    - overcloud-containers

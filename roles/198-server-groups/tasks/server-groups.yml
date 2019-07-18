@@ -1,15 +1,15 @@
 ---
 - name: Ensuring server affinity groups for {{ os_project }} are {{ new_state }}
   os_server_group:
-    cloud: "{{ os_cluster_admincreds }}"
+    cloud: "{{ os_cluster }}"
     cacert: "{{ cacertfile }}"
     state: "{{ new_state }}"
     name: "{{ item }}"
     policies:
       - "{{ affinity_policy }}"
-  when: use_affinity_groups == "true"
+  when: use_affinity_groups
   with_items:
-    - "{{ node_types }}"
+    - pacemaker
   tags:
     - server-groups
     - infrastructure

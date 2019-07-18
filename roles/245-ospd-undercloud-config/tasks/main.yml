@@ -1,5 +1,6 @@
 ---
-# tasks file for 080-rhn-register
+# tasks file 245-ospd-undercloud-config
 - include: configure-rabbitmq-selinux.yml
 - include: undercloud-config.yml
 - include: overcloud-hosts-config.yml
+- include: undercloud-cert-setup.yml

@@ -1,0 +1,17 @@
+---
+
+- name: Get a list of the overcloud volumes
+  shell: "openstack --os-cloud {{ os_cluster }} volume list -c Name -f value"
+  register: vol_result
+  tags:
+    - always
+
+- name: set the instance_network fact
+  set_fact:
+    volumes: "{{ vol_result.stdout_lines }}"
+  tags:
+   - always
+
+- name: Dump all
+  debug:
+    var: volumes | select('match', '.*ceph-2.*') | list | length

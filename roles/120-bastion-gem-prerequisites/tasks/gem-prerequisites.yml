@@ -1,5 +1,5 @@
-
-- name:  Ensure {{ bastion_user }} .gemrc are {{ new_state}}
+---
+- name: Ensure {{ bastion_user }} .gemrc are {{ new_state}}
   template:
     src: gemrc.j2
     dest: ~/.gemrc
@@ -37,3 +37,27 @@
     state: "{{ new_state }}"
   become: true
   when: gem_install==true
+
+- name: Ensure puppet_forge rubygem is {{ new_state }}
+  gem:
+    name: puppet_forge
+    version: 2.2.6
+    state: "{{ new_state }}"
+    user_install: no
+  become: true
+  when: gem_install==true
+  tags:
+    - puppetforge
+    - r10k
+    - templates
+
+- name: Ensure r10k rubygem is {{ new_state }}
+  gem:
+    name: r10k
+    state: "{{ new_state }}"
+    user_install: no
+  become: true
+  when: gem_install==true
+  tags:
+    - r10k
+    - templates

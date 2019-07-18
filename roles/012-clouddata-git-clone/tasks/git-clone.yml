@@ -1,0 +1,10 @@
+
+
+- name: Ensure clouddata git repo checkout is present
+  git:
+    repo: "{{ git_repos.clouddata.url }}"
+    version: master
+    dest: "~/clouddata"
+    accept_hostkey: true
+  tags:
+    - always

@@ -43,8 +43,9 @@
     /home/stack/undercloud_install.log
   become: yes
   become_user: stack
+  ignore_errors: True
   when: nova_status_result.stdout_lines | last == "ActiveState=inactive"
-  async: 3600
+  async: 5400
   poll: 20
   tags:
     - undercloud-install

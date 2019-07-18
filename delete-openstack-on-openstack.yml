@@ -1,15 +1,5 @@
-- name: Confirm deletion of openstack environment.
-  hosts:
-    - localhost
-  tasks:
-    - name: Wait for the user to confirm the deletion.
-      pause:
-        prompt: "WARNING!!!! This playbook will delete the dev-cloud environment including all of the cloud snapshots! Are you sure you want to continue? (enter yes to continue or Ctrl+c a to abort)"
-      register: my_pause
-      delegate_to: localhost
-    - name: Abort play if the user has not entered yes.
-      fail: msg="Aborting the deletion"
-      when: not (hostvars['localhost'].my_pause.user_input | bool)
+---
+
 
 - name: Prepare inventory and variables
   hosts:
@@ -17,12 +7,14 @@
   vars:
     state: present
   tasks:
+  tags:
+    - always
   roles:
     - role: 018-keystone-domain-facts
     - role: 022-keystone-project-facts
     - role: 160-bastion-load-clouddata
-    - role: 210-ospd-inventory-update
-      new_state: "{{ state }}"
+      clouddata_path: "/etc/puppet/cloud_environments/{{ r10k_environment }}/clouddata/clouddata"
+
 
 - name: OpenStack undercloud
   hosts:
@@ -31,6 +23,8 @@
     state: absent
   tasks:
   roles:
+    - role: 210-ospd-inventory-update
+      new_state: "{{ state }}"
     - role: 001-baremetal-cloud-cacert-import
       new_state: "{{ state }}"
       access_user: "{{ ospd_user }}"
@@ -39,8 +33,8 @@
       new_state: "{{ state }}"
     - role: 235-ospd-package-install
       new_state: "{{ state }}"
-    - role: 220-ospd-yum-repos
-      new_state: "{{ state }}"
+#   - role: 220-ospd-yum-repos
+#     new_state: "{{ state }}"
 
 - name: OpenStack infrastructure
   hosts:
@@ -48,12 +42,9 @@
   vars:
     state: absent
   tasks:
+  tags:
+    - infrastructure
   roles:
-    - role: 001-baremetal-cloud-cacert-import
-      new_state: "{{ state }}"
-      access_user: "{{ bastion_user }}"
-      access_user_group: "{{ bastion_user_group }}"
-    - role: 205-ospd-floatingip
-      new_state: "{{ state }}"
+    #- role: 360-overcloud-cleanup
     - role: 200-nova-instances
       new_state: "{{ state }}"

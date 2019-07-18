@@ -9,6 +9,26 @@
   tags:
     - ospd-openstack-client
 
+#- name: fetch the undercloud access key onto the bastion host
+#  fetch:
+#    src: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+#    dest: /tmp/cm-local-ca.pem
+#    flat: yes
+##  become: yes
+#  tags:
+#    - ospd-openstack-client
+
+#- name: copy undercloud cacert into position
+#  copy:
+#    src: /tmp/cm-local-ca.pem
+#    dest: /etc/pki/ca-trust/source/anchors/cm-local-ca.pem
+#    owner: root
+#    group: root
+#    mode: 0644
+#  become: true
+#  delegate_to: localhost
+#  tags:
+#    - ospd-openstack-client
 
 - name:  Ensure openstack client configuration is present
   copy:

@@ -1,0 +1,20 @@
+---
+
+- name: copy the undercloud access key onto the overcloud host
+  copy:
+    content: "{{ hostvars['localhost']['clouddata']['CAMAP'][0]['IPA'] }}"
+    dest: /etc/pki/ca-trust/source/anchors/ipa_ca.crt
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  become_user: root
+  tags:
+    - trust-ipa-ca
+
+- name: Run update-ca-trust on the bastion to trust the ipa ca
+  shell: "update-ca-trust extract"
+  become: true
+  become_user: root
+  tags:
+    - trust-ipa-ca

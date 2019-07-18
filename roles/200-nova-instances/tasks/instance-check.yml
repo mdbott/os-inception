@@ -1,6 +1,6 @@
 ---
 
-- name: Get a json object containing instance networks
+- name: Get a list of the overcloud instances
   shell: "openstack --os-cloud {{ os_cluster }} server list -c Name -f value"
   register: result
   tags:

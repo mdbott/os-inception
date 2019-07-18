@@ -1,12 +1,9 @@
 ---
-
-
 - name: set the ospd_float fact
   set_fact:
     ospd_ip: "{{ networks['external'].cidr_prefix }}.{{ last_octet['ospd']['ospd_1'] }}"
   tags:
     - ospd-inventory
-
 
 - name: Ensure the bastion instance is {{ new_state }} in the bastion group
   add_host:
@@ -21,43 +18,6 @@
   tags:
     - ospd-inventory
 
-
-- name: Ensure ssh confguration is present
-  blockinfile:
-    dest: ~/.ssh/config
-    create: yes
-    marker: "# {mark} ospd network access "
-    content: |
-      Host {{ ospd_ip }}
-        User cloud-user
-        StrictHostKeyChecking no
-        UserKnownHostsFile=/dev/null
-        IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
-      Host {{ prefix }}-ospd-1.{{ clouddata.domain }}
-        User cloud-user
-        StrictHostKeyChecking no
-        UserKnownHostsFile=/dev/null
-        IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
-      Host {{ prefix }}-ospd-1
-        User cloud-user
-        StrictHostKeyChecking no
-        UserKnownHostsFile=/dev/null
-        IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
-  become: false
-  tags:
-    - ospd-inventory
-
-- name: Update /etc/hosts with ospd nodes
-  lineinfile:
-    dest: /etc/hosts
-    regexp: '{{ ospd_ip }}.*'
-    line: '{{ ospd_ip }} {{ prefix}}-ospd-1.{{ clouddata.domain }} {{ prefix}}-ospd-1'
-    state: present
-  become: true
-  tags:
-    - ospd-inventory
-
-
 - name: Wait for the ospd instance to become accessable
   wait_for:
     port: 22
@@ -66,4 +26,3 @@
     delay: 10
   tags:
     - ospd-inventory
-  when: new_state == "started"

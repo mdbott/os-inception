@@ -17,7 +17,7 @@
 - name: deploy docker registry CA cert
   copy:
     dest: "/etc/docker/certs.d/{{ undercloud.container_registry }}/ca.crt"
-    content: "{{ underclound.container_registry_cacert }}"
+    content: "{{ undercloud.container_registry_cacert }}"
     owner: root
     group: root
     mode: 0644

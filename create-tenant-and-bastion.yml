@@ -13,6 +13,11 @@
     - role: 007-set-running-user
       when: use_running_user|bool == true
     - role: 010-merge-os-creds
+    - role: 012-clouddata-git-clone
+    - role: 160-bastion-load-clouddata
+      clouddata_path: "~/clouddata"
+      tags:
+        - always
     - role: 015-openstack-client
       new_state: "{{ state }}"
     - role: 018-keystone-domain-facts
@@ -61,27 +66,33 @@
     - bastion-deploy
   tasks:
   roles:
+    - role: 001-baremetal-cloud-cacert-import
+      new_state: "{{ state }}"
+      access_user: "{{ bastion_user }}"
+      access_user_group: "{{ bastion_user_group }}"
     - role: 105-bastion-networking
+      new_state: "{{ state }}"
+    - role: 080-subscription-manager
       new_state: "{{ state }}"
     - role: 110-bastion-yum-prerequisites
       new_state: "{{ state }}"
-    - role: 115-bastion-pip-prerequisites
-      new_state: "present"
-    - role: 120-bastion-gem-prerequisites
-      new_state: "{{ state }}"
+    # - role: 115-bastion-pip-prerequisites
+    #   new_state: "present"
+    # - role: 120-bastion-gem-prerequisites
+    #   new_state: "{{ state }}"
     - role: 125-bastion-openstack-client
     - role: 010-merge-os-creds
     - role: 130-bastion-cloud-user-key
     - role: 135-bastion-git-clone
-    - role: 140-bastion-puppetforge-gem
-      new_state: "{{ state }}"
-    - role: 145-bastion-r10k-gem
-      new_state: "{{ state }}"
+    # - role: 140-bastion-puppetforge-gem
+    #   new_state: "{{ state }}"
+    # - role: 145-bastion-r10k-gem
+    #   new_state: "{{ state }}"
     - role: 150-bastion-r10k-config
       new_state: "{{ state }}"
-    - role: 155-bastion-r10k-run
-    - role: 160-bastion-load-clouddata
-    - role: 165-dev-cloud-cacert-import
-      bastion_host: "{{ os_project }}-bastion"
+    # - role: 155-bastion-r10k-run
+    # - role: 160-bastion-load-clouddata
+    # - role: 165-dev-cloud-cacert-import
+    #   bastion_host: "{{ os_project }}-bastion"
+    - role: 195-bastion-ospd-host
     - role: 315-ceph-ansible
-      new_state: "{{ state }}"

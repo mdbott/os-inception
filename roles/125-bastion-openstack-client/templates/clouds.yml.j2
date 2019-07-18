@@ -28,13 +28,13 @@ clouds:
     cacert: {{ cacertfile }}
   undercloud:
     auth:
-      auth_url: http://{{ undercloud.network_gateway }}:5000/v2.0
+      auth_url: https://{{ os_project }}-ospd-1-vip.{{ hostvars['localhost']['clouddata']['domain'] }}}:13000/v2.0
       username: admin
       password: {{ undercloud_admin_password }}
-      project_name: {{ admin_project }}
+      project_name: admin
   undercloud_v3:
     auth:
-      auth_url: http://{{ undercloud.network_gateway }}:5000/
+      auth_url: https://{{ os_project }}-ospd-1-vip.{{ hostvars['localhost']['clouddata']['domain'] }}:13000/
       username: admin
       password: {{ undercloud_admin_password }}
       project_name: admin

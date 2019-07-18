@@ -1,0 +1,5 @@
+---
+# tasks file for 080-rhn-register
+- include: remove-overcloud-ipa-hosts.yml
+- include: remove-overcloud-ipa-vips.yml
+- include: remove-undercloud-ipa-hosts.yml

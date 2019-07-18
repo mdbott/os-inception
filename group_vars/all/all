@@ -168,6 +168,7 @@ reposerver_url: http://yum.example.com
 # No default is provided. This should be supplied at the command line with_items
 # extra_vars
 osp_version: 13
+bastion_ansible_version: 2.8
 
 yum_repos:
   - rhel-7-server-extras-rpms
@@ -184,7 +185,7 @@ yum_repos:
   - rhel-ha-for-rhel-7-server-rpms
 
 bastion_yum_repos:
-  - epel
+  # - epel
   - rhel-7-server-extras-rpms
   - rhel-7-server-openstack-{{ osp_version }}-devtools-rpms
   - rhel-7-server-openstack-{{ osp_version }}-optools-rpms
@@ -192,10 +193,11 @@ bastion_yum_repos:
   - rhel-7-server-rh-common-rpms
   - rhel-7-server-rpms
   - rhel-7-server-satellite-tools-6.2-rpms
-  - rhel-7-server-openstack-10-tools-rpms
+  - rhel-7-server-openstack-{{ osp_version }}-tools-rpms
   - rhel-7-server-rhceph-3-tools-rpms
   - rhel-7-server-rhceph-3-mon-rpms
   - rhel-7-server-rhceph-3-osd-rpms
+  - rhel-7-server-ansible-{{ bastion_ansible_version }}-rpms
 
 
 yum_gpgcheck: no
@@ -224,6 +226,8 @@ instance_az: "nova"
 git_repo_server: gitlab.consulting.redhat.com
 
 git_repos:
+  clouddata:
+    url: "ssh://git@gitlocation.server.example.com/Group/clouddata.git"
   foreman: "ssh://git@gitlocation.server.example.com/Group/foreman.git"
   icloud: "ssh://git@gitlocation.server.example:2222/Group/icloud-puppet.git"
   ceph_ansible:
@@ -242,6 +246,7 @@ git_repos:
     url: "git+ssh://git@gitlocation.server.example:2222/Group/ansible.git"
     branch: "devel"
 
+
 r10k_environment: icloud_{{ icloud_puppet_branch }}
 
 use_existing_external_network: "false"
@@ -253,7 +258,7 @@ use_octavia: false
 
 # The below is used to ensure the instances span multiple nodes for HA (pacemaker/loadbalanced services)
 affinity_policy: "anti-affinity"
-use_affinity_groups: "true"
+use_affinity_groups: false
 
 # Internal configuration
 # These values are considered "internal". Changes to this file are not required to get
@@ -366,21 +371,24 @@ flavors_nested:
     ram: 8192
     disk: 20
     ephemeral: 0
-    extra_specs: "hw_rng:allowed=True"
+    extra_specs:
+      "hw_rng:allowed": "True"
   pacemaker:
     name: "{{ prefix }}.pacemaker"
     vcpus: 2
     ram: 8192
     disk: 20
     ephemeral: 0
-    extra_specs: "hw_rng:allowed=True"
+    extra_specs:
+      "hw_rng:allowed": "True"
   service:
     name: "{{ prefix }}.service"
     vcpus: 2
     ram: 16384
     disk: 10
     ephemeral: 0
-    extra_specs: "hw_rng:allowed=True"
+    extra_specs:
+      "hw_rng:allowed": "True"
   compute:
     name: "{{ prefix }}.compute"
     vcpus: 4
@@ -389,8 +397,7 @@ flavors_nested:
     ephemeral: 0
     extra_specs:
       "hw_rng:allowed": "True"
-      aggregate_instance_extra_specs:
-        filter_tenant_id: "{{ os_project_id }}"
+      "aggregate_instance_extra_specs:filter_tenant_id": "{{ devcloud_project_id }}"
   ceph:
     name: "{{ prefix }}.ceph"
     vcpus: 2
@@ -499,16 +506,16 @@ subnets_allocation_pool_end: 250
 networks:
   provisioning:
     name: "{{ prefix }}_provisioning"
-    cidr: "192.0.2.0/24"
+    cidr: "192.168.24.0/24"
     netmask_length: 24
-    cidr_prefix: "192.0.2"
+    cidr_prefix: "192.168.24"
     port_security_enabled: false
     no_security_groups: true
     enable_dhcp: false
     no_gateway_ip: true
     gateway_ip:
     dns_nameservers: []
-    pool_start: 10
+    pool_start: 5
     pool_end:  250
     inspection_start: 130
     inspection_end: 150
@@ -523,7 +530,7 @@ networks:
     no_gateway_ip: true
     gateway_ip:
     dns_nameservers: []
-    pool_start: 10
+    pool_start: 5
     pool_end:  250
     use_existing: "false"
   storage:
@@ -536,7 +543,7 @@ networks:
     no_gateway_ip: true
     gateway_ip:
     dns_nameservers: []
-    pool_start: 10
+    pool_start: 5
     pool_end:  250
     use_existing: "false"
   storagemgmt:
@@ -549,7 +556,7 @@ networks:
     no_gateway_ip: true
     gateway_ip:
     dns_nameservers: []
-    pool_start: 10
+    pool_start: 5
     pool_end:  250
     use_existing: "false"
   tenant:
@@ -562,7 +569,7 @@ networks:
     no_gateway_ip: true
     gateway_ip:
     dns_nameservers: []
-    pool_start: 10
+    pool_start: 5
     pool_end:  250
     use_existing: "false"
   external:
@@ -575,7 +582,7 @@ networks:
     no_gateway_ip: false
     gateway_ip: 192.168.100.1
     dns_nameservers: ["10.76.23.245","10.76.23.244"]
-    pool_start: 10
+    pool_start: 5
     pool_end: 250
     use_existing: "false"
 
@@ -587,9 +594,9 @@ last_octet:
   ospd:
     ospd_1: 253
   pacemaker:
-    pacemaker_1: 31
-    pacemaker_2: 32
-    pacemaker_3: 33
+    pacemaker_1: 11
+    pacemaker_2: 12
+    pacemaker_3: 13
   service:
     service_1: 14
     service_2: 15
@@ -675,12 +682,15 @@ undercloud:
   inspection_end: "{{ networks.provisioning.cidr_prefix }}.{{ networks.provisioning.inspection_end }}"
   undercloud_admin_password: "{{ undercloud_admin_password }}"
   # Options are 'none' (no encryption), 'localca', 'ipa'
-  undercloud_encryption: none
-  use_novajoin: false
+  undercloud_encryption: ipa
+  use_novajoin: true
+  # create a new local undercloud registry as part of deployment
+  # otherwise will use an existing shared registry in the environment
+  deploy_undercloud_registry: false
   container_registry: registry.access.redhat.com
   container_project: rhosp13
-  insecure_registry: true
-  container_registry_encryption: false
+  insecure_registry: false
+  container_registry_encryption: true
   container_registry_cacert: |
     -----BEGIN CERTIFICATE-----
     -----END CERTIFICATE-----
@@ -690,7 +700,7 @@ undercloud:
 undercloud_auth_env_v2:
   NOVA_VERSION: 1.1
   OS_PASSWORD: "{{ undercloud_admin_password }}"
-  OS_AUTH_URL: "http://{{ undercloud.network_gateway }}:5000/v2.0"
+  OS_AUTH_URL: "https://{{ os_project }}-ospd-1-vip.{{ clouddata.domain }}:13000/v2.0"
   OS_USERNAME: admin
   OS_TENANT_NAME: admin
   COMPUTE_API_VERSION: 1.1
@@ -703,7 +713,7 @@ undercloud_auth_env_v2:
 undercloud_auth_env_v3:
   NOVA_VERSION: 1.1
   OS_PASSWORD: "{{ undercloud_admin_password }}"
-  OS_AUTH_URL: "http://{{ undercloud.network_gateway }}:5000/"
+  OS_AUTH_URL: "https://{{ os_project }}-ospd-1-vip.{{ clouddata.domain }}:13000/"
   OS_USERNAME: admin
   OS_AUTH_TYPE: password
   OS_PROJECT_NAME: admin
@@ -724,20 +734,13 @@ overcloud_image_files:
 # yum packages which will be installed on the ansible node
 yum_prerequisites:
   - git
-  - patch
-  - gcc
-  - make
-  - rubygems
-  - rubygem-bundler
-  - qemu-img
-  - jq-1.5-1.el7
   - vim
-  - python-devel
-  - sshpass
-  - python-dns
   - unzip
   - tmux
-
+  - python-openstackclient
+  - python2-oslo-log
+  - ansible
+  - podman
 
 getpip_url: https://bootstrap.pypa.io/get-pip.py
 

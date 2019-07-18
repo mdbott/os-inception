@@ -1,0 +1,32 @@
+---
+
+- name: Get a json object containing instance networks
+  shell: "openstack server list -c Name -f value"
+  environment:
+    OS_PROJECT_NAME: "{{ os_project }}"
+    OS_PROJECT_ID: "{{ devcloud_project_id }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ os_user_domain_name}}"
+    OS_NO_CACHE: True
+    COMPUTE_API_VERSION: 2.1
+    OS_USERNAME: "{{ os_username }}"
+    OS_CLOUDNAME: overcloud
+    OS_AUTH_URL: "{{ os_cluster_keystone_adminurl }}"
+    NOVA_VERSION: 1.1
+    OS_PASSWORD: "{{ os_password }}"
+    OS_CACERT: "{{ cacertfile }}"
+    OS_USER_DOMAIN_NAME: "{{ os_user_domain_name }}"
+    OS_IDENTITY_API_VERSION: "{{ identity_api_version  }}"
+    OS_INTERFACE: "{{ endpoint_type }}"
+  register: result
+  tags:
+    - always
+
+- name: set the instance_network fact
+  set_fact:
+    instances: "{{ result.stdout_lines }}"
+  tags:
+   - always
+
+- name: Dump all
+  debug:
+    var: instances | select('match', '.*bastion.*') | list | length

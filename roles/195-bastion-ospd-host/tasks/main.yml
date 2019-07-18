@@ -1,0 +1,4 @@
+---
+# tasks file for 195-bastion-ospd-host
+- include: update-hosts-and-ssh-config.yml
+- include: trust-ipa-ca.yml

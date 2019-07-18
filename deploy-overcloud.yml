@@ -15,6 +15,7 @@
   roles:
     - role: 007-set-running-user
     - role: 160-bastion-load-clouddata
+      clouddata_path: "/etc/puppet/cloud_environments/{{ r10k_environment }}/clouddata/clouddata"
     - role: 210-ospd-inventory-update
       new_state: "{{ state }}"
 

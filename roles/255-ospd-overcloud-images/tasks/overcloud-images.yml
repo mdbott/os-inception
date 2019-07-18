@@ -28,38 +28,39 @@
     - undercloud
     - rebuild
 
-- name: Generate local mirror repo definition file
-  template:
-    src: "templates/localmirror.repo.j2"
-    dest: "/home/{{ stack_user }}/images/localmirror.repo"
-    owner: "{{ stack_user }}"
-    group: "{{ stack_user }}"
-    mode: 0644
-  become: true
-  tags:
-    - overcloud-images
-    - undercloud
-    - rebuild
-
-- name: Install libguestfs-tools-c to manipulate overcloud images
-  yum:
-    name: libguestfs-tools-c
-    state: present
-  become: true
-  tags:
-    - overcloud-images
-    - undercloud
-    - rebuild
-
-- name: Inject local mirror repo definition file
-  shell: "virt-customize -a /home/stack/images/overcloud-full.qcow2 --copy-in /home/{{ stack_user }}/images/localmirror.repo:/etc/yum.repos.d --root-password password:{{ overcloud_rootpw }}"
-  environment:
-    LIBGUESTFS_BACKEND: direct
-  become: true
-  tags:
-    - overcloud-images
-    - undercloud
-    - rebuild
+# - name: Generate local mirror repo definition file
+#   template:
+#     src: "templates/localmirror.repo.j2"
+#     dest: "/home/{{ stack_user }}/images/localmirror.repo"
+#     owner: "{{ stack_user }}"
+#     group: "{{ stack_user }}"
+#     mode: 0644
+#   become: true
+#   tags:
+#     - overcloud-images
+#     - undercloud
+#     - rebuild
+#
+# - name: Install libguestfs-tools-c to manipulate overcloud images
+#   yum:
+#     name: libguestfs-tools-c
+#     state: present
+#   become: true
+#   tags:
+#     - overcloud-images
+#     - undercloud
+#     - rebuild
+#
+# - name: Inject local mirror repo definition file
+#   shell: "virt-customize -a /home/stack/images/overcloud-full.qcow2 --copy-in /home/{{ stack_user }}/images/localmirror.repo:/etc/yum.repos.d --root-password password:{{ overcloud_rootpw }}"
+#   environment:
+#     LIBGUESTFS_BACKEND: direct
+#   no_log: true
+#   become: true
+#   tags:
+#     - overcloud-images
+#     - undercloud
+#     - rebuild
 
 - name: Ensure undercloud glance images are {{ new_state }}
   shell: "openstack overcloud image upload --image-path /home/stack/images/ --update-existing"

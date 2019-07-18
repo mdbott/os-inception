@@ -1,0 +1,73 @@
+---
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud vip is absent in IPA
+  ipa_host:
+    name: "{{ prefix }}.{{ clouddata.domain }}"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud internalapi vip is absent in IPA
+  ipa_host:
+    name: "{{ prefix }}.internalapi.{{ clouddata.domain }}"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud storage vip is absent in IPA
+  ipa_host:
+    name: "{{ prefix }}.storage.{{ clouddata.domain }}"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Wait 10 seconds for ipa connections to clear
+  wait_for:
+    port: 443
+    host: "{{ IPAserver }}"
+    delay: 10
+
+- name: Ensure overcloud ctlplane vip is absent in IPA
+  ipa_host:
+    name: "{{ prefix }}.ctlplane.{{ clouddata.domain }}"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  tags:
+    - overcloud-ipa-cleanup
+    - ipa-cleanup

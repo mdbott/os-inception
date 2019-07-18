@@ -1,0 +1,24 @@
+---
+
+- name: Ensure git ssh confguration is present
+  blockinfile:
+    dest: ~/.ssh/config
+    create: yes
+    marker: "# {mark} git access "
+    content: |
+      Host "{{ git_repo_server }}"
+        User git
+        StrictHostKeyChecking no
+        UserKnownHostsFile=/dev/null
+        IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
+        IdentitiesOnly yes
+  become: false
+  tags:
+    - git-clone
+
+- name: fix permissions on ssh public key file
+  file:
+    path: "~/.ssh/config"
+    mode: 0600
+  tags:
+    - git-clone

@@ -6,6 +6,7 @@
   tasks:
   roles:
     - role: 160-bastion-load-clouddata
+      clouddata_path: "/etc/puppet/cloud_environments/{{ r10k_environment }}/clouddata/clouddata"
     - role: 215-ospd-load-clouds-yaml
     - role: 210-ospd-inventory-update
       new_state: "{{ state }}"

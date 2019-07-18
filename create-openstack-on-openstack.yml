@@ -13,11 +13,14 @@
     state: present
   tasks:
   roles:
-    #- role: 010-merge-os-creds
     - role: 007-set-running-user
+    - role: 155-bastion-r10k-run
+    - role: 160-bastion-load-clouddata
+      clouddata_path: "/etc/puppet/cloud_environments/{{ r10k_environment }}/clouddata/clouddata"
     - role: 018-keystone-domain-facts
     - role: 022-keystone-project-facts
-    - role: 160-bastion-load-clouddata
+    - role: 198-server-groups
+      new_state: "{{ state }}"
     - role: 200-nova-instances
       new_state: "{{ state }}"
       when: preprovisioned_nodes|bool == false
@@ -27,11 +30,6 @@
     - role: 205-ospd-floatingip
       new_state: "{{ state }}"
     - role: 210-ospd-inventory-update
-      new_state: "{{ state }}"
-    - role: 001-baremetal-cloud-cacert-import
-      new_state: "{{ state }}"
-      access_user: "{{ bastion_user }}"
-      access_user_group: "{{ bastion_user_group }}"
     - role: 215-ospd-load-clouds-yaml
 
 ##################################################
@@ -47,7 +45,8 @@
     state: present
   tasks:
   roles:
-    - role: 220-ospd-yum-repos
+#   - role: 220-ospd-yum-repos
+    - role: 080-subscription-manager
       new_state: "{{ state }}"
     - role: 225-ospd-networking
       new_state: "{{ state }}"
@@ -58,7 +57,6 @@
       new_state: "{{ state }}"
     - role: 242-ospd-load-clouddata
       when: undercloud.use_novajoin|bool == true
-    #- role: 243-ospd-ipa-cert-setup
     - role: 244-ospd-novajoin
       when: undercloud.use_novajoin|bool == true
     - role: 245-ospd-undercloud-config
@@ -68,6 +66,7 @@
     - role: 252-ospd-openstack-client
     - role: 255-ospd-overcloud-images
       new_state: "{{ state }}"
+    - role: 257-ospd-container-registry
     - role: 260-ospd-overcloud-flavor-update
     - role: 262-ospd-ctlplane
       when: undercloud.use_novajoin|bool == true

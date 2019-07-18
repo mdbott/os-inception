@@ -3,6 +3,7 @@
 - name: generate the openstack user credentials for a v3 cloud
   set_fact:
     openstack_user_auth_env: "{{ openstack_user_auth_env_v2|combine(openstack_user_auth_env_v3) }}"
+  no_log: true
   when: identity_api_version|int==3
   tags:
     - creds
@@ -11,6 +12,7 @@
 - name: generate the openstack user credentials for a v2 cloud
   set_fact:
     openstack_user_auth_env: "{{ openstack_user_auth_env_v2 }}"
+  no_log: true
   when: identity_api_version|int==2
   tags:
     - creds
@@ -19,6 +21,7 @@
 - name: generate the openstack admin credentials for a v3 cloud
   set_fact:
     openstack_admin_auth_env: "{{ openstack_admin_auth_env_v2|combine(openstack_admin_auth_env_v3) }}"
+  no_log: true
   when: identity_api_version|int==3
   tags:
     - creds
@@ -27,6 +30,7 @@
 - name: generate the openstack admin credentials for a v2 cloud
   set_fact:
     openstack_admin_auth_env: "{{ openstack_admin_auth_env_v2 }}"
+  no_log: true
   when: identity_api_version|int==2
   tags:
     - creds

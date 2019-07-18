@@ -1,0 +1,29 @@
+---
+
+
+- name: Ensure ospd vip haproxy service is absent in IPA
+  ipa_service:
+    name: "haproxy/{{ prefix }}-ospd-1-vip.{{ clouddata.domain }}"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  tags:
+    - undercloud-ipa-cleanup
+    - ipa-cleanup
+
+- name: Ensure undercloud nodes are absent in IPA
+  ipa_host:
+    name: "{{ prefix }}-{{ item }}.{{ clouddata.domain }}"
+    state: absent
+    ipa_host: "{{ IPAserver }}"
+    ipa_user: "{{ IPAusername }}"
+    ipa_pass: "{{ IPApassword }}"
+    validate_certs: False
+  loop:
+    - ospd-1
+    - ospd-1-vip
+  tags:
+    - undercloud-ipa-cleanup
+    - ipa-cleanup

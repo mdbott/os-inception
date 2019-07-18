@@ -19,7 +19,7 @@
       - port-name: "{{ prefix }}_ospd_cloud_access"
     meta:
       group: pacemaker
-  when: use_existing_external_network == "false" and instances | select('match', '.*ospd.*') | list | length < 1 and new_state=="present" and cloud_access=="private"
+  when: use_existing_external_network == "false" and instances | select('match', '.*ospd.*') | list | length < nodes.ospd.count and new_state=="present" and cloud_access=="private"
   with_sequence:
     count="{{ nodes[node_type].count }}"
   tags:
@@ -46,7 +46,7 @@
       - port-name: "{{ prefix }}_provisioning_{{ node_type }}_{{ item }}"
     meta:
       group: pacemaker
-  when: use_existing_external_network == "false" and instances | select('match', '.*ospd.*') | list | length < 1 and new_state=="present" and cloud_access=="public"
+  when: use_existing_external_network == "false" and instances | select('match', '.*ospd.*') | list | length < nodes.ospd.count and new_state=="present" and cloud_access=="public"
   with_sequence:
     count="{{ nodes[node_type].count }}"
   tags:

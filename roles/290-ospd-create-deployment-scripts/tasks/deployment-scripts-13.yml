@@ -1,4 +1,16 @@
 ---
+- name: Create directory for overcloud deployment logs
+  file:
+    state: directory
+    path: /home/{{ stack_user }}/logs
+    owner: "{{ stack_user }}"
+    group: "{{ stack_user }}"
+    mode: 0755
+  become: true
+  tags:
+    - deploy-script
+    - templates
+    - rebuild
 
 - name: Create the osp13 deploy script
   template:
