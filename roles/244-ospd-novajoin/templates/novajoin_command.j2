@@ -6,6 +6,6 @@
 --server {{ clouddata.Domains.IPA.url.split('/')[2] }} \
 --realm {{ clouddata.domain|upper }} \
 --domain {{ clouddata.domain }} \
---hostname {{ os_project }}-ospd-1.{{ clouddata.domain }} \
+--hostname {{ os_project|replace('_','-') }}-ospd-1.{{ clouddata.domain }} \
 --otp-file /home/stack/ipaotp \
 --precreate

@@ -4,12 +4,12 @@ local_interface = {{ undercloud.local_interface }}
 local_mtu = {{ undercloud.local_mtu }}
 enable_tempest = true
 
-undercloud_hostname = {{ os_project }}-ospd-1.{{ clouddata.domain }}
+undercloud_hostname = {{ os_project|replace('_','-') }}-ospd-1.{{ clouddata.domain }}
 {% if undercloud.use_novajoin|bool %}
 enable_novajoin = true
 ipa_otp = {{ novajoin_ipa_otp }}
-service_principal = haproxy/{{ os_project }}-ospd-1-vip.{{ clouddata.domain }}
-undercloud_public_host = {{ os_project }}-ospd-1-vip.{{ clouddata.domain }}
+service_principal = haproxy/{{ os_project|replace('_','-') }}-ospd-1-vip.{{ clouddata.domain }}
+undercloud_public_host = {{ os_project|replace('_','-') }}-ospd-1-vip.{{ clouddata.domain }}
 undercloud_admin_vip = {{ undercloud.undercloud_admin_vip }}
 
 certificate_generation_ca = IPA
