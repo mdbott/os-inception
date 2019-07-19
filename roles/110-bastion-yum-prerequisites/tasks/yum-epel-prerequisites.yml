@@ -1,0 +1,17 @@
+---
+
+- name: Ensure the bastion is subscribed to EPEL
+  rhsm_repository:
+    name:
+      - EPEL-x86_64
+  become: true
+  tags:
+    - yum-prereqs
+
+- name: Ensure yum prerequisites are {{ new_state }}
+  yum:
+    name: "{{ yum_prerequisites }}"
+    state: "{{ new_state }}"
+  tags:
+    - yum-prereqs
+  become: true

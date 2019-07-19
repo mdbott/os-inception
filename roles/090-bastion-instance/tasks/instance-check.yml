@@ -1,6 +1,6 @@
 ---
 
-- name: Get a json object containing instance networks
+- name: Get a list of the bastion instances
   shell: "openstack server list -c Name -f value"
   environment:
     OS_PROJECT_NAME: "{{ os_project }}"

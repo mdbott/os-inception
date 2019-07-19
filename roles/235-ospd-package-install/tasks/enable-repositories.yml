@@ -1,0 +1,9 @@
+---
+
+
+- name: Ensure undercloud packages and dependencies are {{ new_state }}
+  rhsm_repository:
+    name: "{{ yum_repos }}"
+  become: true
+  tags:
+    - yum-prereqs

@@ -3,6 +3,7 @@
   yum:
     name: "{{ satellite_pkg }}"
     state: "{{ new_state }}"
+    validate_certs: no
   become: true
   tags:
     - sub-man

@@ -16,7 +16,7 @@
         StrictHostKeyChecking no
         UserKnownHostsFile=/dev/null
         IdentityFile ~/.ssh/id_rsa.osdev{{ os_project }}
-      Host {{ prefix }}-ospd-1.{{ domain_name }}
+      Host {{ prefix }}-ospd-1.{{ hostvars["localhost"]["clouddata"]["domain"] }}
         User cloud-user
         StrictHostKeyChecking no
         UserKnownHostsFile=/dev/null
@@ -34,7 +34,7 @@
   lineinfile:
     dest: /etc/hosts
     regexp: '{{ ospd_ip }}.*'
-    line: '{{ ospd_ip }} {{ prefix}}-ospd-1.{{ domain_name }} {{ prefix}}-ospd-1'
+    line: '{{ ospd_ip }} {{ prefix}}-ospd-1.{{ hostvars["localhost"]["clouddata"]["domain"] }} {{ prefix}}-ospd-1'
     state: present
   become: true
   tags:

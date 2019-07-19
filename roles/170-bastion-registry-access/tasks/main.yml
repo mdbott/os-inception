@@ -1,0 +1,4 @@
+---
+# tasks file for 002-yum-prerequisites
+- include: insecure-registry.yml
+  when: undercloud.insecure_registry|bool == true

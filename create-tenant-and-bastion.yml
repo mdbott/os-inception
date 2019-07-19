@@ -13,6 +13,8 @@
     - role: 007-set-running-user
       when: use_running_user|bool == true
     - role: 010-merge-os-creds
+    - role: 030-cloud-user-key
+      new_state: "{{ state }}"
     - role: 012-clouddata-git-clone
     - role: 160-bastion-load-clouddata
       clouddata_path: "~/clouddata"
@@ -29,8 +31,6 @@
     - role: 027-nested-virt-host-aggregate
       new_state: "{{ state }}"
       when: isolate_nested_computes==true
-    - role: 030-cloud-user-key
-      new_state: "{{ state }}"
     - role: 035-openstack-quota
       new_state: "{{ state }}"
     - role: 040-neutron-networks
