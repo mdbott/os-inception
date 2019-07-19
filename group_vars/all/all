@@ -694,7 +694,10 @@ undercloud:
   container_registry_cacert: |
     -----BEGIN CERTIFICATE-----
     -----END CERTIFICATE-----
-
+bash_aliases:
+  - { alias: 'inception-playbook', command: 'sudo podman run -it --privileged -v /etc/puppetlabs:/etc/puppetlabs:rw -v /etc/puppet/cloud_environments:/etc/puppet/cloud_environments:rw -v /etc/hosts:/etc/hosts:rw -v /home/cloud-user:/home/cloud-user:rw -v /etc/pki/ca-trust/source/anchors/:/etc/pki/ca-trust/source/anchors/ {{ undercloud.container_registry }}/cloudteam/os-inception:1.0.0 ansible-playbook'}
+  - { alias: 'r10k', command: 'sudo podman run -it --privileged -v /etc/puppetlabs:/etc/puppetlabs:rw -v /etc/puppet/cloud_environments:/etc/puppet/cloud_environments:rw -v /etc/hosts:/etc/hosts:rw -v /home/cloud-user:/home/cloud-user:rw -v /etc/pki/ca-trust/source/anchors/:/etc/pki/ca-trust/source/anchors/ {{ undercloud.container_registry }}/cloudteam/os-inception:1.0.0 /usr/local/bin/r10k'}
+  - { alias: 'maxhammer', command: 'sudo podman run -it --privileged -v /etc/puppetlabs:/etc/puppetlabs:rw -v /etc/puppet/cloud_environments:/etc/puppet/cloud_environments:rw -v /etc/hosts:/etc/hosts:rw -v /home/cloud-user:/home/cloud-user:rw -v /etc/pki/ca-trust/source/anchors/:/etc/pki/ca-trust/source/anchors/ {{ undercloud.container_registry }}/cloudteam/os-inception:1.0.0 /usr/bin/maxhammer'}
 # undercloud environment variables used for running openstack commands
 # on the undercloud using shell module
 undercloud_auth_env_v2:
@@ -741,6 +744,9 @@ yum_prerequisites:
   - python2-oslo-log
   - ansible
   - podman
+
+yum_epel_prerequisites:
+  - jq-1.5.1-1.el7
 
 getpip_url: https://bootstrap.pypa.io/get-pip.py
 

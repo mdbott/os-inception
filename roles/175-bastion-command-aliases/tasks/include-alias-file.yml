@@ -1,0 +1,12 @@
+---
+
+- name: Automatically include aliases for bastion commands
+  blockinfile:
+    dest: "~/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK aliases"
+    block: |
+      if [ -f ~/.bash_aliases ]; then
+        . ~/.bash_aliases
+      fi
+  tags:
+    - bastion-aliases

@@ -1,0 +1,12 @@
+---
+
+- name: Setup bash aliases for bastion commands
+  lineinfile:
+    dest: "~/.bash_aliases"
+    create: yes
+    mode: 0644
+    line: 'alias {{ item.alias }}="{{ item.command }}"'
+    regexp: "^alias {{ item.alias }}="
+  loop: "{{ bash_aliases }}"
+  tags:
+    - bastion-aliases

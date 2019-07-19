@@ -1,0 +1,12 @@
+---
+
+- name: Ensure yum repositories are {{new_state}}
+  ini_file:
+    path: /etc/containers/registries.conf
+    section: registries.insecure
+    option: registries
+    value: "[\'{{ undercloud.container_registry }}\']"
+  become: true
+  become_user: root
+  tags:
+    - registry-access

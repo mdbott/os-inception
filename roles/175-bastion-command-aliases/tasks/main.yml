@@ -1,0 +1,3 @@
+---
+- include: include-aliases-file.yml
+- include: setup-aliases.yml
